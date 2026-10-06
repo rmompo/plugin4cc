@@ -1,0 +1,101 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "plugin4cc",
+  "description": "Personal plugin marketplace for Claude Code — productivity skills for everyday development",
+  "owner": {
+    "name": "rmompo",
+    "email": "rmompo@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "p4cc-core",
+      "description": "Core productivity plugin: behavioral directives (P4CCD), intelligent model routing via subagents, and Conventional Commits enforcement.",
+      "author": {
+        "name": "rmompo"
+      },
+      "category": "productivity",
+      "source": "./plugins/p4cc-core",
+      "homepage": "https://github.com/rmompo/plugin4cc/tree/main/plugins/p4cc-core"
+    },
+    {
+      "name": "p4cc-statusline",
+      "description": "Visual enhancement: custom statusline with project path, git branch, active model and color-coded usage metrics.",
+      "author": {
+        "name": "rmompo"
+      },
+      "category": "productivity",
+      "source": "./plugins/p4cc-statusline",
+      "homepage": "https://github.com/rmompo/plugin4cc/tree/main/plugins/p4cc-statusline"
+    },
+    {
+      "name": "p4cc-buddy",
+      "description": "<company>-specific skills: <hr-platform> mission report generator with full 145-entry competency catalog.",
+      "author": {
+        "name": "rmompo"
+      },
+      "category": "productivity",
+      "source": "./plugins/p4cc-buddy",
+      "homepage": "https://github.com/rmompo/plugin4cc/tree/main/plugins/p4cc-buddy"
+    },
+    {
+      "name": "p4cc-ccvv",
+      "description": "AI-powered CV generation and management — multi-user profiles, job offer adaptation, and multi-format export.",
+      "author": {
+        "name": "rmompo"
+      },
+      "category": "productivity",
+      "source": "./plugins/p4cc-ccvv",
+      "homepage": "https://github.com/rmompo/plugin4cc/tree/main/plugins/p4cc-ccvv"
+    },
+    {
+      "name": "p4cc-coding",
+      "description": "Coding standards and best practices: universal directives (SOLID, DRY, naming, error handling, security) auto-loaded at session start, with stack-specific skills for TypeScript, Python, Go, and Java.",
+      "author": {
+        "name": "rmompo"
+      },
+      "category": "productivity",
+      "source": "./plugins/p4cc-coding",
+      "homepage": "https://github.com/rmompo/plugin4cc/tree/main/plugins/p4cc-coding"
+    },
+    {
+      "name": "p4cc-plugin",
+      "description": "Plugin lifecycle management: scaffold new plugins with all required files and registry entries in one step.",
+      "author": {
+        "name": "rmompo"
+      },
+      "category": "productivity",
+      "source": "./plugins/p4cc-plugin",
+      "homepage": "https://github.com/rmompo/plugin4cc/tree/main/plugins/p4cc-plugin"
+    },
+    {
+      "name": "p4cc-converter",
+      "description": "Converts documents to Markdown (PDF, DOC, DOCX, PPT, PPTX) using a multi-step local tool pipeline.",
+      "author": {
+        "name": "rmompo"
+      },
+      "category": "productivity",
+      "source": "./plugins/p4cc-converter",
+      "homepage": "https://github.com/rmompo/plugin4cc/tree/main/plugins/p4cc-converter"
+    },
+    {
+      "name": "p4cc-crawler",
+      "description": "Web crawler and documentation extractor: crawls sites (static or SPA/Storybook), filters by topic, downloads attachments, and generates structured Markdown output.",
+      "author": {
+        "name": "rmompo"
+      },
+      "category": "productivity",
+      "source": "./plugins/p4cc-crawler",
+      "homepage": "https://github.com/rmompo/plugin4cc/tree/main/plugins/p4cc-crawler"
+    },
+    {
+      "name": "p4cc-agent",
+      "description": "Agent definition auditor: validates markdown agent files for structural completeness, naming conventions, and cross-reference integrity.",
+      "author": {
+        "name": "rmompo"
+      },
+      "category": "productivity",
+      "source": "./plugins/p4cc-agent",
+      "homepage": "https://github.com/rmompo/plugin4cc/tree/main/plugins/p4cc-agent"
+    }
+  ]
+}

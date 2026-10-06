@@ -1,0 +1,9 @@
+{
+  "name": "p4cc-buddy",
+  "version": "1.0.2",
+  "description": "Company-specific skills for Claude Code: <hr-platform> mission report generation from workspace context.",
+  "author": {
+    "name": "rmompo",
+    "email": "rmompo@gmail.com"
+  }
+}

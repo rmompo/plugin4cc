@@ -1,0 +1,38 @@
+# p4cc-statusline
+
+Visual enhancement plugin for Claude Code. Replaces the default statusline with a color-coded bar showing project context, git branch, active model and usage metrics.
+
+## Result
+
+```
+⌂ ~/your/project  ⎇ main  ✦ Sonnet 5.5 (medium)  CX16% SN88% WK8%
+```
+
+| Segment | Color | Description |
+|---------|-------|-------------|
+| `⌂ path` | 🟡 Yellow block | Project directory, home collapsed to `~` |
+| `⎇ branch` | 🔵 Cyan block | Current git branch / worktree (omitted outside a git repo) |
+| `✦ Model (effort)` | 🟣 Purple block | Active model display name, followed by the effort level in parentheses when available (e.g. `✦ Sonnet 5.5 (medium)`) |
+| `CX%` | 🟢/🟡/🔴 | Context window usage |
+| `SN%` | 🟢/🟡/🔴 | 5-hour session rate limit |
+| `WK%` | 🟢/🟡/🔴 | 7-day weekly rate limit |
+
+The `⌂`, `⎇` and `✦` segments are colored blocks (reverse video). Usage values are colored by threshold: green (≤40%) · yellow (≤75%) · red (>75%).
+
+## Skills
+
+| Skill | Invocation | What it does |
+|-------|-----------|--------------|
+| `install` | `/p4cc-statusline:install` · once after install | Installs script and activates statusline |
+
+## Installation
+
+```bash
+claude plugins marketplace add rmompo/plugin4cc
+claude plugins install p4cc-statusline
+/p4cc-statusline:install
+```
+
+## Notes
+
+- Pairs well with [`p4cc-core`](../p4cc-core/README.md) but works standalone.

@@ -1,0 +1,9 @@
+{
+  "name": "p4cc-core",
+  "version": "1.2.30",
+  "description": "Core behavioral directives (P4CCD), intelligent model routing, and Conventional Commits enforcement",
+  "author": {
+    "name": "rmompo",
+    "email": "rmompo@gmail.com"
+  }
+}
