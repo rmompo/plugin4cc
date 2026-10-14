@@ -26,6 +26,50 @@ pct_color() {
   fi
 }
 
+
+# Terminal width: $COLUMNS → /dev/tty → ancestor's tty → tput → 120
+term_width() {
+  local w pid tty
+  if [ -n "${COLUMNS:-}" ]; then printf '%s' "$COLUMNS"; return; fi
+  w=$(stty size </dev/tty 2>/dev/null | awk '{print $2}')
+  if [ -z "$w" ]; then
+    pid=$$
+    while [ -n "$pid" ] && [ "$pid" -gt 1 ]; do
+      tty=$(ps -o tty= -p "$pid" 2>/dev/null | tr -d ' ')
+      if [ -n "$tty" ] && [ "$tty" != "?" ] && [ -e "/dev/$tty" ]; then
+        w=$(stty size <"/dev/$tty" 2>/dev/null | awk '{print $2}')
+        [ -n "$w" ] && break
+      fi
+      pid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')
+    done
+  fi
+  [ -z "$w" ] && w=$(tput cols 2>/dev/null)
+  printf '%s' "${w:-120}"
+}
+
+# Shorten a path to fit $2 columns. Replaces directory levels with "…",
+# from the highest level (closest to root) to the lowest; the last level is never replaced.
+# Usage: fit_path "$path" "$max_len"
+fit_path() {
+  local path="$1" max="$2" prefix rest i k cand
+  local -a parts
+  case "$path" in
+    "~"|"~/"*) prefix="~"; rest="${path#\~}" ;;
+    *)         prefix="";  rest="$path" ;;
+  esac
+  rest="${rest#/}"
+  IFS='/' read -r -a parts <<< "$rest"
+  local n=${#parts[@]}
+  for (( k=0; k<=n-1; k++ )); do
+    cand="$prefix"
+    for (( i=0; i<n; i++ )); do
+      if [ "$i" -lt "$k" ]; then cand="${cand}/…"; else cand="${cand}/${parts[$i]}"; fi
+    done
+    [ "${#cand}" -le "$max" ] && { printf '%s' "$cand"; return; }
+  done
+  printf '%s' "$cand"   # most compressed form
+}
+
 project_dir=$(echo "$input" | jq -r '.workspace.project_dir // .workspace.current_dir' | sed "s|^$HOME|~|")
 git_worktree=$(echo "$input" | jq -r '.workspace.git_worktree // .worktree.branch // empty')
 if [ -z "$git_worktree" ]; then
@@ -39,17 +83,18 @@ seven_day=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // emp
 
 SEP=" "
 
-# Project dir — yellow reverse block
-output="$(rev_block "$YELLOW" "⌂ ${project_dir}")"
-
 # Git branch — cyan reverse block
+rest_out=""
+plain_rest=""
 if [ -n "$git_worktree" ]; then
-  output="${output}${SEP}$(rev_block "$CYAN" "⎇ ${git_worktree}")"
+  rest_out="${SEP}$(rev_block "$CYAN" "⎇ ${git_worktree}")"
+  plain_rest="${SEP} ⎇ ${git_worktree} "
 fi
 
 # Model (+ effort level when the model supports it) — purple reverse block
 model_label="✦ ${model}${effort:+ (${effort})}"
-output="${output}${SEP}$(rev_block "$PURPLE" "$model_label")"
+rest_out="${rest_out}${SEP}$(rev_block "$PURPLE" "$model_label")"
+plain_rest="${plain_rest}${SEP} ${model_label} "
 
 # Usage: CXxx% SNxx% WKxx% — uppercase labels, value colored by threshold
 usage_part=""
@@ -75,7 +120,16 @@ if [ -n "$seven_day" ]; then
 fi
 
 if [ -n "$usage_part" ]; then
-  output="${output}${SEP}${usage_part}"
+  rest_out="${rest_out}${SEP}${usage_part}"
+  plain_usage=$(printf '%s' "$usage_part" | sed $'s/\033\\[[0-9;]*m//g')
+  plain_rest="${plain_rest}${SEP}${plain_usage}"
 fi
+
+# Project dir — yellow reverse block; shrink path with "…" only if the line does not fit
+width=$(term_width)
+# Block is " ⌂ <path> " = path + 4 columns; keep 1 column of slack
+max_path=$(( width - ${#plain_rest} - 4 - 1 ))
+project_dir=$(fit_path "$project_dir" "$max_path")
+output="$(rev_block "$YELLOW" "⌂ ${project_dir}")${rest_out}"
 
 echo -e "${output}"

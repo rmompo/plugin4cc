@@ -285,10 +285,14 @@
       "description": "Claude Code-exclusive enhancements: custom statusline with project path, git branch, active model with effort level and color-coded usage metrics.",
       "category": "productivity",
       "status": "stable",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "spec": "specs/p4cc-statusline.md",
       "path": "plugins/p4cc-statusline",
       "changelog": [
+        {
+          "version": "1.0.4",
+          "changes": "statusline: shorten the CWD with … (highest level first, last level never) when the line does not fit the terminal width"
+        },
         {
           "version": "1.0.3",
           "changes": "statusline: show effort level in parentheses after the model name"
@@ -309,8 +313,12 @@
       "skills": [
         {
           "name": "install",
-          "version": 3,
+          "version": 4,
           "changelog": [
+            {
+              "version": 4,
+              "changes": "Install script that shortens the CWD with … when the line does not fit"
+            },
             {
               "version": 3,
               "changes": "Show effort level in parentheses after the model name"

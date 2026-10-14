@@ -1,6 +1,6 @@
 # Plugin Spec: p4cc-statusline
 
-> **Status:** `stable` | **Version:** `1.0.3`
+> **Status:** `stable` | **Version:** `1.0.4`
 
 ---
 
@@ -51,6 +51,8 @@ If any condition fails → installs/updates automatically and reports briefly.
 
 Color thresholds: ≤40% green · ≤75% yellow · >75% red.
 
+Path shortening: when the line does not fit the terminal width, only the `⌂ path` segment is shortened. Directory levels are replaced by `…` from the highest (closest to root) to the lowest, one at a time, until it fits: `~/a/b/c/proj` → `~/…/b/c/proj` → `~/…/…/c/proj` → `~/…/…/…/proj`. The last level is never replaced.
+
 ### Non-Goals
 - Does not modify any project files
 - Does not affect Claude's behavior or responses
@@ -61,6 +63,7 @@ Color thresholds: ≤40% green · ≤75% yellow · >75% red.
 
 | Version | Changes |
 |---------|---------|
+| 1.0.4 | statusline: shorten the CWD with … (highest level first, last level never) when the line does not fit the terminal width |
 | 1.0.3 | statusline: show effort level in parentheses after the model name |
 | 1.0.1 | Version alignment to Z system |
 | 1.0.0 | Initial release — renamed from p4-statusline, skill setup→statusline |
