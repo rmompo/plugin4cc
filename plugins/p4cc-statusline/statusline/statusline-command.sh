@@ -49,6 +49,7 @@ term_width() {
 
 # Shorten a path to fit $2 columns. Replaces directory levels with "…",
 # from the highest level (closest to root) to the lowest; the last level is never replaced.
+# If even that does not fit, all hidden levels collapse into "… …": ~/… …/last.
 # Usage: fit_path "$path" "$max_len"
 fit_path() {
   local path="$1" max="$2" prefix rest i k cand
@@ -67,7 +68,8 @@ fit_path() {
     done
     [ "${#cand}" -le "$max" ] && { printf '%s' "$cand"; return; }
   done
-  printf '%s' "$cand"   # most compressed form
+  # Still too long: collapse every hidden level into "… …"
+  printf '%s' "${prefix}/… …/${parts[$((n-1))]}"
 }
 
 project_dir=$(echo "$input" | jq -r '.workspace.project_dir // .workspace.current_dir' | sed "s|^$HOME|~|")

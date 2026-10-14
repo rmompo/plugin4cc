@@ -19,7 +19,7 @@ Visual enhancement plugin for Claude Code. Replaces the default statusline with 
 
 The `⌂`, `⎇` and `✦` segments are colored blocks (reverse video). Usage values are colored by threshold: green (≤40%) · yellow (≤75%) · red (>75%).
 
-If the line does not fit the terminal width, the path is shortened with `…` from the highest directory level to the lowest (`~/…/projects/personal/plugin4cc` → `~/…/…/personal/plugin4cc` → `~/…/…/…/plugin4cc`); the last level is never replaced.
+If the line does not fit the terminal width, the path is shortened with `…` from the highest directory level to the lowest (`~/…/projects/personal/plugin4cc` → `~/…/…/personal/plugin4cc` → `~/…/…/…/plugin4cc`); the last level is never replaced. If even that does not fit, all hidden levels collapse into `… …` (`~/… …/plugin4cc`).
 
 ## Skills
 

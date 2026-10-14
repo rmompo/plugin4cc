@@ -1,6 +1,6 @@
 # Plugin Spec: p4cc-statusline
 
-> **Status:** `stable` | **Version:** `1.0.5`
+> **Status:** `stable` | **Version:** `1.0.6`
 
 ---
 
@@ -51,7 +51,7 @@ If any condition fails → installs/updates automatically and reports briefly.
 
 Color thresholds: ≤40% green · ≤75% yellow · >75% red.
 
-Path shortening: when the line does not fit the terminal width, only the `⌂ path` segment is shortened. Directory levels are replaced by `…` from the highest (closest to root) to the lowest, one at a time, until it fits: `~/a/b/c/proj` → `~/…/b/c/proj` → `~/…/…/c/proj` → `~/…/…/…/proj`. The last level is never replaced.
+Path shortening: when the line does not fit the terminal width, only the `⌂ path` segment is shortened. Directory levels are replaced by `…` from the highest (closest to root) to the lowest, one at a time, until it fits: `~/a/b/c/proj` → `~/…/b/c/proj` → `~/…/…/c/proj` → `~/…/…/…/proj`. The last level is never replaced. If even that does not fit, all hidden levels collapse into `… …`: `~/… …/proj`.
 
 ### Non-Goals
 - Does not modify any project files
@@ -63,6 +63,7 @@ Path shortening: when the line does not fit the terminal width, only the `⌂ pa
 
 | Version | Changes |
 |---------|---------|
+| 1.0.6 | statusline: when the fully shortened CWD still overflows, collapse hidden levels into ~/… …/last |
 | 1.0.5 | statusline: reserve 5 columns of right slack so the line is never truncated by Claude Code |
 | 1.0.4 | statusline: shorten the CWD with … (highest level first, last level never) when the line does not fit the terminal width |
 | 1.0.3 | statusline: show effort level in parentheses after the model name |

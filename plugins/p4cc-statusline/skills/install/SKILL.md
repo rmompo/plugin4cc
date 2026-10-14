@@ -1,7 +1,7 @@
 ---
 name: install
 description: One-time setup skill for p4cc-statusline. Installs the statusline script and activates it in ~/.claude/settings.json. Invoke once after installing the plugin. Also invoked explicitly as /p4cc-statusline:install.
-version: 5
+version: 6
 argument-hint: []
 allowed-tools: [Bash, Read, Edit]
 ---
