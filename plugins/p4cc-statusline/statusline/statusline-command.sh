@@ -127,8 +127,9 @@ fi
 
 # Project dir — yellow reverse block; shrink path with "…" only if the line does not fit
 width=$(term_width)
-# Block is " ⌂ <path> " = path + 4 columns; keep 1 column of slack
-max_path=$(( width - ${#plain_rest} - 4 - 1 ))
+# Block is " ⌂ <path> " = path + 4 columns. Claude Code reserves ~4 columns on the
+# right of the statusline (it truncates with "…" at width-4), so keep 5 of slack.
+max_path=$(( width - ${#plain_rest} - 4 - 5 ))
 project_dir=$(fit_path "$project_dir" "$max_path")
 output="$(rev_block "$YELLOW" "⌂ ${project_dir}")${rest_out}"
 

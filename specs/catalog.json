@@ -285,10 +285,14 @@
       "description": "Claude Code-exclusive enhancements: custom statusline with project path, git branch, active model with effort level and color-coded usage metrics.",
       "category": "productivity",
       "status": "stable",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "spec": "specs/p4cc-statusline.md",
       "path": "plugins/p4cc-statusline",
       "changelog": [
+        {
+          "version": "1.0.5",
+          "changes": "statusline: reserve 5 columns of right slack so the line is never truncated by Claude Code"
+        },
         {
           "version": "1.0.4",
           "changes": "statusline: shorten the CWD with … (highest level first, last level never) when the line does not fit the terminal width"
@@ -313,8 +317,12 @@
       "skills": [
         {
           "name": "install",
-          "version": 4,
+          "version": 5,
           "changelog": [
+            {
+              "version": 5,
+              "changes": "Install script with 5-column right slack to avoid truncation"
+            },
             {
               "version": 4,
               "changes": "Install script that shortens the CWD with … when the line does not fit"

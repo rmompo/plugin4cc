@@ -1,6 +1,6 @@
 # Plugin Spec: p4cc-statusline
 
-> **Status:** `stable` | **Version:** `1.0.4`
+> **Status:** `stable` | **Version:** `1.0.5`
 
 ---
 
@@ -63,6 +63,7 @@ Path shortening: when the line does not fit the terminal width, only the `⌂ pa
 
 | Version | Changes |
 |---------|---------|
+| 1.0.5 | statusline: reserve 5 columns of right slack so the line is never truncated by Claude Code |
 | 1.0.4 | statusline: shorten the CWD with … (highest level first, last level never) when the line does not fit the terminal width |
 | 1.0.3 | statusline: show effort level in parentheses after the model name |
 | 1.0.1 | Version alignment to Z system |
