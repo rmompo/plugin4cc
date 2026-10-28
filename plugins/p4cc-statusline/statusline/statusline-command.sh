@@ -89,12 +89,28 @@ SEP=" "
 rest_out=""
 plain_rest=""
 if [ -n "$git_worktree" ]; then
-  rest_out="${SEP}$(rev_block "$CYAN" "⎇ ${git_worktree}")"
-  plain_rest="${SEP} ⎇ ${git_worktree} "
+  git_dir=$(echo "$input" | jq -r '.workspace.project_dir // .workspace.current_dir')
+  # ◌N untracked (not ignored) · ●N changed (staged or unstaged) · ⇡N commits not pushed
+  git_status=$(git -C "$git_dir" status --porcelain 2>/dev/null || true)
+  n_untracked=0
+  n_changed=0
+  if [ -n "$git_status" ]; then
+    n_untracked=$(printf '%s\n' "$git_status" | grep -c '^??' || true)
+    n_changed=$(printf '%s\n' "$git_status" | grep -vc '^??' || true)
+  fi
+  n_ahead=$(git -C "$git_dir" rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)
+
+  git_label="⎇ ${git_worktree}"
+  [ "$n_untracked" -gt 0 ] && git_label="${git_label} ◌${n_untracked}"
+  [ "$n_changed" -gt 0 ] && git_label="${git_label} ●${n_changed}"
+  [ "$n_ahead" -gt 0 ] && git_label="${git_label} ⇡${n_ahead}"
+
+  rest_out="${SEP}$(rev_block "$CYAN" "$git_label")"
+  plain_rest="${SEP} ${git_label} "
 fi
 
 # Model (+ effort level when the model supports it) — purple reverse block
-model_label="✦ ${model}${effort:+ (${effort})}"
+model_label="${model}${effort:+ (${effort})}"
 rest_out="${rest_out}${SEP}$(rev_block "$PURPLE" "$model_label")"
 plain_rest="${plain_rest}${SEP} ${model_label} "
 
@@ -129,10 +145,10 @@ fi
 
 # Project dir — yellow reverse block; shrink path with "…" only if the line does not fit
 width=$(term_width)
-# Block is " ⌂ <path> " = path + 4 columns. Claude Code reserves ~4 columns on the
+# Block is " <path> " = path + 2 columns. Claude Code reserves ~4 columns on the
 # right of the statusline (it truncates with "…" at width-4), so keep 5 of slack.
-max_path=$(( width - ${#plain_rest} - 4 - 5 ))
+max_path=$(( width - ${#plain_rest} - 2 - 5 ))
 project_dir=$(fit_path "$project_dir" "$max_path")
-output="$(rev_block "$YELLOW" "⌂ ${project_dir}")${rest_out}"
+output="$(rev_block "$YELLOW" "${project_dir}")${rest_out}"
 
 echo -e "${output}"

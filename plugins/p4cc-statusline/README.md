@@ -5,19 +5,19 @@ Visual enhancement plugin for Claude Code. Replaces the default statusline with 
 ## Result
 
 ```
-⌂ ~/your/project  ⎇ main  ✦ Sonnet 5.5 (medium)  CX16% SN88% WK8%
+~/your/project  ⎇ main ◌2 ●3 ⇡1  Sonnet 5.5 (medium)  CX16% SN88% WK8%
 ```
 
 | Segment | Color | Description |
 |---------|-------|-------------|
-| `⌂ path` | 🟡 Yellow block | Project directory, home collapsed to `~` |
-| `⎇ branch` | 🔵 Cyan block | Current git branch / worktree (omitted outside a git repo) |
-| `✦ Model (effort)` | 🟣 Purple block | Active model display name, followed by the effort level in parentheses when available (e.g. `✦ Sonnet 5.5 (medium)`) |
+| `path` | 🟡 Yellow block | Project directory, home collapsed to `~` |
+| `⎇ branch` | 🔵 Cyan block | Current git branch / worktree (omitted outside a git repo), followed by git state indicators; each one is hidden when its count is 0: `◌N` untracked files (not ignored) · `●N` changed files (staged or unstaged) · `⇡N` commits not yet pushed |
+| `Model (effort)` | 🟣 Purple block | Active model display name, followed by the effort level in parentheses when available (e.g. `Sonnet 5.5 (medium)`) |
 | `CX%` | 🟢/🟡/🔴 | Context window usage |
 | `SN%` | 🟢/🟡/🔴 | 5-hour session rate limit |
 | `WK%` | 🟢/🟡/🔴 | 7-day weekly rate limit |
 
-The `⌂`, `⎇` and `✦` segments are colored blocks (reverse video). Usage values are colored by threshold: green (≤40%) · yellow (≤75%) · red (>75%).
+The path, branch and model segments are colored blocks (reverse video). Usage values are colored by threshold: green (≤40%) · yellow (≤75%) · red (>75%).
 
 If the line does not fit the terminal width, the path is shortened with `…` from the highest directory level to the lowest (`~/…/projects/personal/plugin4cc` → `~/…/…/personal/plugin4cc` → `~/…/…/…/plugin4cc`); the last level is never replaced. If even that does not fit, all hidden levels collapse into `… …` (`~/… …/plugin4cc`).
 
