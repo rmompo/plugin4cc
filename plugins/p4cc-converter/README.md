@@ -1,6 +1,6 @@
 # p4cc-converter
 
-Document-to-Markdown converter plugin for Claude Code. Converts PDF, DOC, DOCX, PPT, and PPTX files to structured, LLM-optimized Markdown using a 6-step local pipeline.
+Document-to-Markdown converter plugin for Claude Code. Converts PDF, DOC, DOCX, PPT, and PPTX files to structured, LLM-optimized Markdown using a local pipeline with optional OCR for scanned documents.
 
 ## Pipeline
 
@@ -8,6 +8,8 @@ Document-to-Markdown converter plugin for Claude Code. Converts PDF, DOC, DOCX, 
 Input (PDF/DOC/DOCX/PPT/PPTX)
     ↓ LibreOffice (non-PDF only)
     PDF
+    ↓ OCR (ocrmypdf — only scanned / image-only pages, optional)
+    PDF with text layer
     ↓ qpdf (5-page chunks)
     .tmp.pdf chunks
     ↓ LLM extraction (sequential)
@@ -23,8 +25,8 @@ Input (PDF/DOC/DOCX/PPT/PPTX)
 | Skill | Invocation | What it does |
 |-------|-----------|--------------|
 | `install` | `/p4cc-converter:install` | Installs the catalog copy, then runs `check`. |
-| `check` | `/p4cc-converter:check` | Read-only check of qpdf, python3, libreoffice and the consolidation script. Reports how to fix anything missing. |
-| `any-to-md` | `/p4cc-converter:any-to-md [path]` | Converts documents to structured Markdown |
+| `check` | `/p4cc-converter:check` | Read-only check of qpdf, python3, libreoffice, optional OCR tools and the consolidation script. Reports how to fix anything missing. |
+| `any-to-md` | `/p4cc-converter:any-to-md [path]` | Converts documents to structured Markdown (OCR for scanned pages) |
 
 ## Requirements
 
@@ -33,6 +35,8 @@ Input (PDF/DOC/DOCX/PPT/PPTX)
 | `qpdf` | ≥11.0.0 | Split PDF into chunks |
 | `python3` | ≥3.8.0 | Consolidation script |
 | `libreoffice` | ≥7.0.0 | Convert DOC/DOCX/PPT/PPTX to PDF |
+| `ocrmypdf` + `tesseract` *(optional)* | any | OCR for scanned or image-only pages |
+| `pdftotext` *(optional)* | any | Detect pages without a text layer (`auto` mode) |
 
 ## Quick start
 
@@ -54,6 +58,12 @@ Input (PDF/DOC/DOCX/PPT/PPTX)
 |----------|---------|-------------|
 | `AGENT_ALL_TO_MD_PATTERN` | — | Input path/glob (overrides interactive prompt) |
 | `AGENT_ALL_TO_MD_REPROCESS` | `false` | Set to `true` to reprocess already-converted files |
+| `AGENT_ALL_TO_MD_OCR` | `auto` | `auto` = OCR only documents with pages lacking a text layer, `always` = force OCR, `never` = disable (also `--ocr <mode>`) |
+| `AGENT_ALL_TO_MD_OCR_LANG` | `spa+eng` | Tesseract language(s), `+`-separated |
+
+## OCR
+
+Scanned or image-only pages are OCR'd with `ocrmypdf` before splitting. The result is saved as `<name>.ocr.pdf` (kept for reuse) and the model cross-checks the OCR text against the page image, so layout, tables and diagrams still come from vision. If the OCR tools are missing, `auto` mode continues without OCR and warns; run `/p4cc-converter:check` for install instructions.
 
 ## Output
 
@@ -69,6 +79,7 @@ pages: 12
 chunks: 3
 chunk_size: 5
 split_tool: qpdf
+ocr: false        # true + ocr_tool / ocr_lang when OCR was applied
 ---
 ```
 

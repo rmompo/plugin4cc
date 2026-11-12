@@ -857,10 +857,14 @@
       "description": "Converts documents to Markdown (PDF, DOC, DOCX, PPT, PPTX) using a multi-step local tool pipeline.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "spec": "specs/p4cc-converter.md",
       "path": "plugins/p4cc-converter",
       "changelog": [
+        {
+          "version": "1.0.8",
+          "changes": "any-to-md: optional OCR (ocrmypdf/tesseract) for scanned pages, --ocr flag and OCR env vars; check: verify OCR tools"
+        },
         {
           "version": "1.0.7",
           "changes": "Add check skill; install now only installs and delegates verification to check"
@@ -923,8 +927,12 @@
         },
         {
           "name": "any-to-md",
-          "version": 4,
+          "version": 8,
           "changelog": [
+            {
+              "version": 8,
+              "changes": "Add optional OCR step (Step 4b)"
+            },
             {
               "version": 4,
               "changes": "fix {path} undefined → SOURCE_FOLDER throughout; clarify OUTPUT_PATH from env var; fix reprocess double-ask; explicit Read tool in Step 6.1; 999-page limit note; per-document loop declaration"
@@ -941,8 +949,12 @@
         },
         {
           "name": "check",
-          "version": 7,
+          "version": 8,
           "changelog": [
+            {
+              "version": 8,
+              "changes": "Verify optional OCR tools (ocrmypdf, tesseract + languages, pdftotext)"
+            },
             {
               "version": 7,
               "changes": "Initial release — read-only check of folders, files and tools"

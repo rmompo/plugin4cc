@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
 alias: all-to-md-consolidate
-version: 1.0
+version: 1.1
 purpose: Consolida los chunks .tmp.md de un documento en un único Markdown final
 created: 2026-02-24
-last_updated: 2026-06-05
+last_updated: 2026-11-12
 plugin: p4cc-converter
 skill: any-to-md (Step 7)
 """
@@ -17,13 +17,17 @@ Uso:
     python3 all-to-md-consolidate.py \\
       --source <ruta/nombre.docx> \\
       --pdf    <ruta/nombre.pdf> \\
-      --output <ruta/nombre.md>
+      --output <ruta/nombre.md> \\
+      [--ocr --ocr-lang spa+eng]
 
 Parámetros:
   --source  Fichero origen (para metadatos del frontmatter)
   --pdf     PDF de referencia para contar páginas y localizar los chunks .tmp.md
             (los chunks siempre están en la misma carpeta que este fichero)
   --output  Ruta del .md final (puede estar en una carpeta diferente al source)
+  --ocr     Opcional. Indica que se aplicó OCR (ocrmypdf) antes del troceado; añade
+            ocr: true, ocr_tool y ocr_lang al frontmatter (sin el flag: ocr: false)
+  --ocr-lang  Opcional. Idioma(s) de Tesseract usados (por defecto: spa+eng)
 
 Ejemplos:
     # Desde DOCX (output en la misma carpeta que el source)
@@ -71,7 +75,7 @@ def get_pdf_page_count(pdf_path: Path) -> int:
             check=True
         )
         return int(result.stdout.strip())
-    except (subprocess.CalledProcessError, ValueError):
+    except (subprocess.CalledProcessError, ValueError, FileNotFoundError):
         return 0
 
 
@@ -150,12 +154,18 @@ def build_frontmatter(
     source_path: Path,
     pages: int,
     chunks: int,
-    converted_via_pdf: bool
+    converted_via_pdf: bool,
+    ocr: bool = False,
+    ocr_lang: str = "spa+eng"
 ) -> str:
     """Genera el frontmatter YAML para el documento final."""
     timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     ext = source_path.suffix.lstrip(".")
     via_pdf = str(converted_via_pdf).lower()
+    if ocr:
+        ocr_block = f"ocr: true\nocr_tool: ocrmypdf\nocr_lang: {ocr_lang}\n"
+    else:
+        ocr_block = "ocr: false\n"
     return (
         "---\n"
         f"source: {source_path.name}\n"
@@ -166,11 +176,13 @@ def build_frontmatter(
         f"chunks: {chunks}\n"
         f"chunk_size: 5\n"
         f"split_tool: qpdf\n"
+        f"{ocr_block}"
         "---\n\n"
     )
 
 
-def consolidate(source_path: Path, pdf_path: Path, output_path: Path) -> None:
+def consolidate(source_path: Path, pdf_path: Path, output_path: Path,
+                ocr: bool = False, ocr_lang: str = "spa+eng") -> None:
     """Proceso principal de consolidación."""
 
     converted_via_pdf = source_path.suffix.lower() in FORMATS_VIA_PDF
@@ -213,7 +225,7 @@ def consolidate(source_path: Path, pdf_path: Path, output_path: Path) -> None:
             pages = int(m.group(2))
 
     # 5. Generar frontmatter y escribir
-    frontmatter = build_frontmatter(source_path, pages, len(chunks), converted_via_pdf)
+    frontmatter = build_frontmatter(source_path, pages, len(chunks), converted_via_pdf, ocr, ocr_lang)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(frontmatter + merged + "\n", encoding="utf-8")
 
@@ -253,6 +265,16 @@ def main():
         type=Path,
         help="Ruta del fichero Markdown de salida (ej: input/docs/manual.md)"
     )
+    parser.add_argument(
+        "--ocr",
+        action="store_true",
+        help="Se aplicó OCR (ocrmypdf) antes del troceado; registra ocr: true en el frontmatter"
+    )
+    parser.add_argument(
+        "--ocr-lang",
+        default="spa+eng",
+        help="Idioma(s) de Tesseract usados en el OCR (por defecto: spa+eng)"
+    )
     args = parser.parse_args()
 
     source_path = args.source.resolve()
@@ -267,7 +289,7 @@ def main():
         print(f"ERROR: El PDF de referencia no existe: {pdf_path}", file=sys.stderr)
         sys.exit(1)
 
-    consolidate(source_path, pdf_path, output_path)
+    consolidate(source_path, pdf_path, output_path, args.ocr, args.ocr_lang)
 
 
 if __name__ == "__main__":

@@ -1,14 +1,14 @@
 ---
 name: any-to-md
-description: Converts PDF, DOC, DOCX, PPT, and PPTX documents to structured Markdown using a 9-step pipeline (inventory → LibreOffice → qpdf split → LLM extraction → Python consolidation → LLM review). Also invoked explicitly as /p4cc-converter:any-to-md.
-version: 4
-argument-hint: "[path/to/file-or-folder-or-glob]"
+description: Converts PDF, DOC, DOCX, PPT, and PPTX documents to structured Markdown using a 9-step pipeline (inventory → LibreOffice → optional OCR → qpdf split → LLM extraction → Python consolidation → LLM review). Scanned or image-only pages are OCR'd automatically. Also invoked explicitly as /p4cc-converter:any-to-md.
+version: 8
+argument-hint: "[path/to/file-or-folder-or-glob] [--ocr auto|always|never]"
 allowed-tools: [Bash, Read, Write, AskUserQuestion]
 ---
 
 # Any to Markdown
 
-Converts documents (PDF, DOC, DOCX, PPT, PPTX) to structured, LLM-optimized Markdown using a 9-step pipeline covering 6 conceptual phases: inventory → to-pdf → split → extract → consolidate → review.
+Converts documents (PDF, DOC, DOCX, PPT, PPTX) to structured, LLM-optimized Markdown using a 9-step pipeline covering 7 conceptual phases: inventory → to-pdf → OCR (optional) → split → extract → consolidate → review.
 
 ```
 CONSOLIDATE_SCRIPT = <plugin-cache>/resources/scripts/all-to-md-consolidate.py
@@ -27,6 +27,8 @@ Where `<plugin-cache>` = `~/.claude/plugins/cache/plugin4cc/p4cc-converter/<vers
 | `SOURCE_FOLDER` | Absolute path to the folder containing the source document |
 | `OUTPUT_PATH` | Destination folder for `.md` files; `null` means co-located with source |
 | `reprocess` | Boolean — whether to reprocess already-converted files |
+| `OCR_MODE` | `auto` (default), `always` or `never` — see Step 1.5 |
+| `OCR_LANG` | Tesseract language(s), `+`-separated (default `spa+eng`) |
 
 ---
 
@@ -82,6 +84,23 @@ Resolve in order of precedence:
 - If `AGENT_ALL_TO_MD_REPROCESS=true` → `reprocess = true` (forced by env var; Step 3 will NOT ask again)
 - Otherwise → `reprocess = false` (default; Step 3 may ask interactively if already-converted files are found)
 
+### 1.5 — OCR mode
+
+OCR makes scanned or image-only pages readable. It is **optional**: it needs `ocrmypdf` (which uses `tesseract`) and, for `auto` detection, `pdftotext`.
+
+Resolve `OCR_MODE` in order of precedence:
+1. Environment variable `AGENT_ALL_TO_MD_OCR`
+2. Flag `--ocr <mode>` passed to the skill invocation
+3. Default: `auto` (never prompts)
+
+| Mode | Behaviour |
+|------|-----------|
+| `auto` | Run OCR only on documents where at least one page has no text layer (detected in Step 4b). Silently skipped if OCR tools are missing — a warning is shown in the inventory |
+| `always` | Force OCR on every PDF, discarding any existing text layer (`--force-ocr`) |
+| `never` | Never run OCR — the pipeline behaves exactly as before |
+
+Resolve `OCR_LANG`: environment variable `AGENT_ALL_TO_MD_OCR_LANG`, otherwise `spa+eng`.
+
 ---
 
 ## Step 2 — Verify tools
@@ -95,7 +114,21 @@ which libreoffice && libreoffice --version 2>&1 | head -1
 ```
 
 - `libreoffice` is **mandatory** only if the inventory will contain DOC/DOCX/PPT/PPTX files.
-- If any required tool is missing → stop and direct the user to run `/p4cc-converter:install`.
+- If any required tool is missing → stop and direct the user to run `/p4cc-converter:check`.
+
+If `OCR_MODE` ≠ `never`, also check the **optional** OCR tools:
+
+```bash
+which ocrmypdf  && ocrmypdf --version 2>&1 | head -1
+which tesseract && tesseract --list-langs 2>&1      # every language in OCR_LANG must be listed
+which pdftotext && pdftotext -v 2>&1 | head -1      # needed only for auto detection
+```
+
+| Situation | Action |
+|-----------|--------|
+| `OCR_MODE=always` and `ocrmypdf` / `tesseract` missing | **Stop** — direct the user to `/p4cc-converter:check` for install instructions |
+| `OCR_MODE=auto` and `ocrmypdf` / `tesseract` / `pdftotext` missing | Continue with `OCR_EFFECTIVE=off` and warn: `OCR tools not found — scanned pages will rely on vision only (run /p4cc-converter:check)` |
+| A language in `OCR_LANG` is not installed | Stop (`always`) or warn and continue without OCR (`auto`); show `sudo apt install tesseract-ocr-<lang>` |
 
 ---
 
@@ -107,8 +140,8 @@ For each file, `SOURCE_FOLDER` = absolute path to the folder containing that fil
 
 | Extension | Conversion route |
 |-----------|-----------------|
-| `.pdf` | Direct → Step 5 (split) |
-| `.doc`, `.docx`, `.ppt`, `.pptx` | Step 4 (to PDF) → Step 5 (split) |
+| `.pdf` | Direct → Step 4b (OCR, if needed) → Step 5 (split) |
+| `.doc`, `.docx`, `.ppt`, `.pptx` | Step 4 (to PDF) → Step 4b (OCR, if needed) → Step 5 (split) |
 
 - Compute the target `.md` path:
   - If `OUTPUT_PATH` is set → `{OUTPUT_PATH}/{name}.md`
@@ -141,6 +174,7 @@ If `reprocess = true` (set by env var in Step 1.4) → include all files without
   Input path:        [input path]
   Output path:       [output path or "co-located with source"]
   Reprocess:         yes/no
+  OCR:               auto|always|never  (lang: spa+eng)  [tools missing → off]
 ══════════════════════════════════════════
 
 Files to process:
@@ -190,19 +224,78 @@ If verification fails → stop and report which file failed.
 
 ---
 
+## Step 4b — OCR (optional)
+
+Skip this step entirely when `OCR_MODE=never` or `OCR_EFFECTIVE=off`.
+
+Let `PDF_BASE` = `{SOURCE_FOLDER}/{name}.pdf` (the native PDF, or the one generated in Step 4) and `PDF_FOR_SPLIT` = the file Step 5 will split. Default: `PDF_FOR_SPLIT = PDF_BASE`, `ocr_applied = false`.
+
+### 4b.1 — Decide
+
+- `OCR_MODE=always` → OCR is needed.
+- `OCR_MODE=auto` → detect pages without a text layer:
+
+```bash
+pdftotext "$PDF_BASE" - 2>/dev/null | python3 -c "
+import sys
+pages = sys.stdin.read().split('\f')
+if pages and not pages[-1].strip(): pages.pop()
+empty = [i+1 for i,p in enumerate(pages) if len(''.join(p.split())) < 20]
+print(len(empty), len(pages), *empty[:20])
+"
+```
+
+  If at least one page has fewer than 20 non-whitespace characters → OCR is needed. Report which pages: `→ guide.pdf: 8 of 12 pages have no text layer — OCR needed`.
+
+If OCR is not needed → keep defaults and continue to Step 5.
+
+### 4b.2 — Run OCR
+
+If `{SOURCE_FOLDER}/{name}.ocr.pdf` already exists and `reprocess = false` → reuse it. Otherwise:
+
+```bash
+# auto  — OCR only pages that have no text layer
+ocrmypdf --skip-text --language "$OCR_LANG" --output-type pdf \
+  "{SOURCE_FOLDER}/{name}.pdf" "{SOURCE_FOLDER}/{name}.ocr.pdf"
+
+# always — rasterize and OCR every page (existing text layer is discarded)
+ocrmypdf --force-ocr --language "$OCR_LANG" --output-type pdf \
+  "{SOURCE_FOLDER}/{name}.pdf" "{SOURCE_FOLDER}/{name}.ocr.pdf"
+```
+
+Verify `{name}.ocr.pdf` exists and is larger than 0 bytes, then set `PDF_FOR_SPLIT = {name}.ocr.pdf` and `ocr_applied = true`.
+
+If `ocrmypdf` fails (encrypted or corrupt PDF, etc.) → in `auto` mode warn and continue with the original PDF (`ocr_applied = false`); in `always` mode stop and report the error.
+
+`{name}.ocr.pdf` is a **permanent artifact** (OCR is slow, so it is reused on reprocessing) — never deleted in Step 8.5. The source file and `{name}.pdf` are never modified.
+
+**Summary:**
+```
+══════════════════════════════════════════
+  OCR SUMMARY
+══════════════════════════════════════════
+  guide.pdf    → guide.ocr.pdf   (8/12 pages OCR'd, lang: spa+eng)
+  manual.pdf   → no OCR needed   (text layer present)
+══════════════════════════════════════════
+```
+
+---
+
 ## Step 5 — Split PDF into chunks (qpdf)
 
-For each document in the inventory, determine the PDF to split:
+For each document in the inventory, determine the PDF to split (`PDF_FOR_SPLIT`):
 
 | Source file | PDF for qpdf |
 |-------------|-------------|
-| `guide.pdf` | `guide.pdf` |
-| `manual.docx` | `manual.pdf` (generated in Step 4) |
-| `slides.pptx` | `slides.pdf` (generated in Step 4) |
+| `guide.pdf` | `guide.pdf`, or `guide.ocr.pdf` if OCR was applied (Step 4b) |
+| `manual.docx` | `manual.pdf` (generated in Step 4), or `manual.ocr.pdf` if OCR was applied |
+| `slides.pptx` | `slides.pdf` (generated in Step 4), or `slides.ocr.pdf` if OCR was applied |
+
+**Chunk names always use `{name}` (the source name), never `{name}.ocr`** — the consolidation script locates chunks by that prefix.
 
 **Get page count:**
 ```bash
-qpdf --show-npages {SOURCE_FOLDER}/{pdf-input}
+qpdf --show-npages {PDF_FOR_SPLIT}
 ```
 
 **Calculate chunks** (chunk size = 5 pages):
@@ -217,7 +310,7 @@ Numeric format: 3 digits zero-padded (`001`, `006`, `011`…). **Note:** this na
 
 **Generate each chunk:**
 ```bash
-qpdf {SOURCE_FOLDER}/{pdf-input} --pages . {page_start}-{page_end} -- {SOURCE_FOLDER}/{name}_{start_fmt}-{end_fmt}.tmp.pdf
+qpdf {PDF_FOR_SPLIT} --pages . {page_start}-{page_end} -- {SOURCE_FOLDER}/{name}_{start_fmt}-{end_fmt}.tmp.pdf
 ```
 
 Verify all expected chunks were created and have size > 0.
@@ -246,7 +339,13 @@ For each chunk `.tmp.pdf`:
 
 ### 6.1 Read the chunk PDF
 
-Use the **Read tool** to open the chunk `.tmp.pdf` — the model interprets text and images directly from the file. Do not use external text extractors (pdftotext, pdfimages, etc.) for this step.
+Use the **Read tool** to open the chunk `.tmp.pdf` — the model interprets text and images directly from the file. Do not use external text extractors (pdftotext, pdfimages, etc.) for this step: when OCR was applied, its result is already embedded in the chunk as a text layer.
+
+**If `ocr_applied = true`:** the chunk carries an OCR text layer for pages that had none. Treat it as a reading aid, not as ground truth — the visual content of the page decides:
+- Use the text layer for running text; it is cheaper and avoids transcription slips.
+- Cross-check numbers, identifiers, codes, names and table cells against what is visible on the page; correct OCR errors (`0`/`O`, `1`/`l`, broken words, split columns).
+- Restore reading order and structure (headings, tables, lists) from the visual layout — OCR often scrambles multi-column pages.
+- If a passage is illegible even visually, write `[illegible]` instead of guessing.
 
 ### 6.2 Apply omission rules
 
@@ -324,8 +423,11 @@ Run the consolidation script:
 python3 "$CONSOLIDATE_SCRIPT" \
   --source {source-path}/{source-name}.{ext} \
   --pdf    {source-path}/{name}.pdf \
-  --output {output-path}/{name}.md
+  --output {output-path}/{name}.md \
+  [--ocr --ocr-lang "$OCR_LANG"]
 ```
+
+Add `--ocr --ocr-lang "$OCR_LANG"` only when `ocr_applied = true`. `--pdf` always points to `{name}.pdf` (never `{name}.ocr.pdf`).
 
 Where `{output-path}` is:
 - `$OUTPUT_PATH` if set (Step 1.3)
@@ -338,6 +440,8 @@ Parameters:
 | `--source` | Original file (for metadata) | `input/docs/manual.docx` |
 | `--pdf` | Reference PDF (for page count) | `input/docs/manual.pdf` |
 | `--output` | Final Markdown output path | `output/manual.md` |
+| `--ocr` | Optional flag — records `ocr: true` in the frontmatter | |
+| `--ocr-lang` | Optional — OCR language(s) recorded in the frontmatter | `spa+eng` |
 
 The script automatically:
 1. Locates all `.tmp.md` for the document (same prefix, same folder, ascending order)
@@ -358,8 +462,11 @@ pages: 12
 chunks: 3
 chunk_size: 5
 split_tool: qpdf
+ocr: false
 ---
 ```
+
+When `--ocr` is passed the script writes `ocr: true`, `ocr_tool: ocrmypdf` and `ocr_lang: <lang>` instead of `ocr: false`.
 
 Verify that `{name}.md` has been created and is not empty.
 
@@ -414,7 +521,7 @@ rm {SOURCE_FOLDER}/{name}_*.tmp.pdf
 rm {SOURCE_FOLDER}/{name}_*.tmp.md
 ```
 
-**The `{SOURCE_FOLDER}/{name}.pdf` (PDF converted from DOC/DOCX/PPT/PPTX) is NOT deleted** — it is a permanent artifact reusable for future reprocessing.
+**The `{SOURCE_FOLDER}/{name}.pdf` (PDF converted from DOC/DOCX/PPT/PPTX) and `{SOURCE_FOLDER}/{name}.ocr.pdf` (OCR output, Step 4b) are NOT deleted** — they are permanent artifacts reusable for future reprocessing.
 
 Confirm deletion by listing the removed files.
 
@@ -442,6 +549,7 @@ For native PDF sources:
 ══════════════════════════════════════════
   Source:      {SOURCE_FOLDER}/guide.pdf
   Output:      {output-path}/guide.md
+  PDF (OCR):   {SOURCE_FOLDER}/guide.ocr.pdf  (preserved; omit this line if OCR was not applied)
   Pages:       7
   Chunks:      2
   Temp files:  deleted (4 files)

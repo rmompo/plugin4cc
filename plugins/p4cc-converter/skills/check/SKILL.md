@@ -1,7 +1,7 @@
 ---
 name: check
 description: Read-only verification of the p4cc-converter infrastructure — folders, files, external tools and plugin resources. Reports status and tells how to install anything missing. Also invoked explicitly as /p4cc-converter:check.
-version: 7
+version: 8
 allowed-tools: [Bash]
 ---
 
@@ -84,6 +84,25 @@ which python3 && python3 --version 2>&1
 which libreoffice && libreoffice --version | head -1 2>&1
 ```
 
+### OCR tools (optional)
+
+Used by `any-to-md` Step 4b to read scanned or image-only pages. Not in the catalog `dependencies` — a missing OCR tool is reported as ⚠️ and never fails the check.
+
+| Name | Purpose |
+|------|---------|
+| `ocrmypdf` | Adds an OCR text layer to PDFs (`--skip-text` / `--force-ocr`) |
+| `tesseract` | OCR engine used by `ocrmypdf`, plus the language packs |
+| `pdftotext` (poppler-utils) | Detects pages without a text layer in `auto` mode |
+
+```bash
+which ocrmypdf  && ocrmypdf --version 2>&1 | head -1
+which tesseract && tesseract --version 2>&1 | head -1
+tesseract --list-langs 2>&1                  # languages installed (default needed: spa, eng)
+which pdftotext && pdftotext -v 2>&1 | head -1
+```
+
+Language check: the default `OCR_LANG` is `spa+eng` (override with `AGENT_ALL_TO_MD_OCR_LANG`); every language it names must appear in `tesseract --list-langs`, otherwise ⚠️ for that language.
+
 ---
 
 ## Step 5 — Print status report
@@ -94,7 +113,7 @@ which libreoffice && libreoffice --version | head -1 2>&1
 ══════════════════════════════════════════
 ```
 
-One table per area (Folders, Plugin resources, Tools):
+One table per area (Folders, Plugin resources, Tools, OCR tools (optional)):
 
 | Area | Item | Required | Found | Status |
 |------|------|----------|-------|--------|
@@ -112,6 +131,31 @@ One table per area (Folders, Plugin resources, Tools):
 For each ❌ / ⚠️ item print the matching fix. **Never run these commands yourself** — only show them.
 
 **Folders / catalog:** run `/p4cc-converter:install`.
+
+### OCR (optional) — `ocrmypdf`, `tesseract`, `pdftotext`
+
+**Debian / Ubuntu / WSL:**
+```bash
+sudo apt install ocrmypdf tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng poppler-utils
+```
+
+**RHEL / Fedora:**
+```bash
+sudo dnf install ocrmypdf tesseract tesseract-langpack-spa tesseract-langpack-eng poppler-utils
+```
+
+**macOS:**
+```bash
+brew install ocrmypdf tesseract tesseract-lang poppler
+```
+
+**PowerShell (Windows):**
+```powershell
+winget install UB-Mannheim.TesseractOCR
+pip install ocrmypdf        # also needs Ghostscript: winget install ArtifexSoftware.GhostScript
+```
+
+Other languages: install the matching pack (`tesseract-ocr-<lang>`), e.g. `tesseract-ocr-fra`.
 
 ### `qpdf`
 
@@ -171,6 +215,12 @@ winget install TheDocumentFoundation.LibreOffice
 All required items ✅:
 ```
 ✅ p4cc-converter infrastructure is complete. No action required.
+```
+
+Optional OCR tools missing (everything else ✅):
+```
+✅ p4cc-converter infrastructure is complete.
+⚠️  OCR tools not found — scanned PDFs will rely on vision only. See the OCR install instructions above.
 ```
 
 Any required item ❌:
