@@ -1,6 +1,6 @@
 # Plugin Spec: p4cc-converter
 
-> **Status:** `beta` | **Version:** `1.0.9`
+> **Status:** `beta` | **Version:** `1.0.10`
 
 ---
 
@@ -80,6 +80,21 @@ Converts one or more documents (PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, XLSM) to M
 - The OCR text layer is a reading aid: Claude cross-checks numbers, codes and table cells against the page image, restores reading order from the layout and writes `[illegible]` instead of guessing.
 - Chunks are always named after the source (`<name>_NNN-NNN.tmp.pdf`), never `<name>.ocr`, because the consolidation script locates chunks by that prefix.
 
+### Format detection (Step 3)
+
+The skill never trusts the file extension. `detect-format.py` (standard library only) reads the content of every candidate and returns its real format:
+
+| Signature / structure | Detected |
+|-----------------------|----------|
+| `%PDF-` | `pdf` |
+| ZIP with `word/` / `xl/` (+ `vbaProject.bin` → macro) / `ppt/` | `docx` / `xlsx` / `xlsm` / `pptx` |
+| ZIP with `xl/workbook.bin`, or `mimetype` of OpenDocument | `xlsb`, `ods` / `odt` / `odp` (not supported) |
+| OLE2 container with `WordDocument` / `PowerPoint Document` / `Workbook`/`Book` stream | `doc` / `ppt` / `xls` |
+| Text: HTML, RTF, XML, CSV/TSV, plain, empty | not supported (skipped with an explanation) |
+
+- Folder scans pre-filter by extension for speed; a file with a wrong or missing extension is converted when passed explicitly (single file, glob or list).
+- Files whose extension does not match their real format are flagged in the inventory and processed from a **copy with the right extension in a temporary folder** (`.<name>.detected.tmp`), so generated files can never overwrite the user's file. `source:` in the frontmatter keeps the name the user provided; `source_format:` records the real format.
+
 ### Spreadsheets (Step 4c)
 
 XLS/XLSX/XLSM skip PDF, OCR, split and chunk extraction:
@@ -139,6 +154,7 @@ When OCR was applied: `ocr: true`, `ocr_tool: ocrmypdf`, `ocr_lang: <lang>`.
 
 | Version | Changes |
 |---------|---------|
+| 1.0.10 | `any-to-md` detects the real format by content (`detect-format.py`): handles wrong/missing extensions, skips unsupported content with an explanation; scripts record `source` and real `source_format`; `check` verifies the new script |
 | 1.0.9 | Add spreadsheet support (XLS/XLSX/XLSM): Step 4c, `xlsx-to-md.py` (openpyxl), `AGENT_ALL_TO_MD_XLSX_MAX_ROWS`; `check` verifies openpyxl |
 | 1.0.8 | Add optional OCR (`ocrmypdf`/`tesseract`): Step 4b, `--ocr` flag and `AGENT_ALL_TO_MD_OCR[_LANG]`; consolidation script records `ocr`, `ocr_tool`, `ocr_lang` in frontmatter and tolerates missing qpdf; `check` verifies OCR tools |
 | 1.0.7 | Add `check` skill; `install` now creates folders/files and delegates verification to `check` |

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 alias: xlsx-to-md
-version: 1.0
+version: 1.1
 purpose: Convierte un libro Excel (.xlsx/.xlsm) en Markdown: una sección por hoja, cada hoja como tabla
 created: 2026-11-12
 last_updated: 2026-11-12
@@ -20,12 +20,14 @@ Uso:
     python3 xlsx-to-md.py \\
       --source <ruta/libro.xlsx> \\
       --output <ruta/libro.md> \\
-      [--original <ruta/libro.xls>] [--max-rows 1000] [--formulas]
+      [--original <ruta/libro.xls>] [--source-format xls] [--max-rows 1000] [--formulas]
 
 Parámetros:
   --source    Libro .xlsx/.xlsm a leer
   --output    Ruta del .md final
   --original  Fichero origen real, solo para el frontmatter (p. ej. el .xls convertido)
+  --source-format  Formato real del origen (xls, xlsx, xlsm), cuando la extensión de --original
+              es errónea; por defecto se deduce de la extensión de --original
   --max-rows  Máximo de filas por hoja (por defecto 1000; 0 = sin límite). Las filas
               sobrantes se omiten y se deja una nota con el total
   --formulas  Muestra la fórmula (=SUM(A1:A3)) en lugar del valor calculado
@@ -147,7 +149,9 @@ def count_uncached_formulas(path: Path) -> int:
     return missing
 
 
-def convert(source: Path, output: Path, original: Path, max_rows: int, formulas: bool) -> None:
+def convert(source: Path, output: Path, original: Path, max_rows: int, formulas: bool,
+            source_format: str = "") -> None:
+    fmt = (source_format or original.suffix.lstrip(".")).lower()
     wb = openpyxl.load_workbook(source, data_only=not formulas)
 
     visible = [ws for ws in wb.worksheets if ws.sheet_state == "visible"]
@@ -176,9 +180,9 @@ def convert(source: Path, output: Path, original: Path, max_rows: int, formulas:
     fm = [
         "---",
         f"source: {original.name}",
-        f"source_format: {original.suffix.lstrip('.').lower()}",
+        f"source_format: {fmt}",
         f"converted: {datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}",
-        "converted_via: openpyxl" + (" (xls → xlsx via libreoffice)" if original.suffix.lower() == ".xls" else ""),
+        "converted_via: openpyxl" + (" (xls → xlsx via libreoffice)" if fmt == "xls" else ""),
         f"sheets: {len(visible)}",
     ]
     if hidden:
@@ -214,6 +218,8 @@ def main():
     parser.add_argument("--output", required=True, type=Path, help="Ruta del .md final")
     parser.add_argument("--original", type=Path, default=None,
                         help="Fichero origen real para el frontmatter (p. ej. el .xls convertido)")
+    parser.add_argument("--source-format", default="", choices=["", "xls", "xlsx", "xlsm"],
+                        help="Formato real del origen si la extensión de --original es errónea")
     parser.add_argument("--max-rows", type=int, default=1000,
                         help="Máximo de filas de datos por hoja (0 = sin límite; por defecto 1000)")
     parser.add_argument("--formulas", action="store_true",
@@ -234,7 +240,7 @@ def main():
 
     original = (args.original or source).resolve()
     try:
-        convert(source, args.output.resolve(), original, args.max_rows, args.formulas)
+        convert(source, args.output.resolve(), original, args.max_rows, args.formulas, args.source_format)
     except Exception as exc:  # fichero corrupto, protegido con contraseña, etc.
         print(f"ERROR: no se pudo leer '{source.name}': {exc}", file=sys.stderr)
         sys.exit(1)

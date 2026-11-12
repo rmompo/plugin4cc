@@ -4,6 +4,8 @@ Document-to-Markdown converter plugin for Claude Code. Converts PDF, DOC, DOCX, 
 
 ## Pipeline
 
+`any-to-md` detects every file's **real format from its content** (file signature and internal structure), never from the extension — a `.docx` named `.pdf`, an `.xlsx` named `.xls` or an extensionless PDF are routed correctly, and mismatches are flagged in the inventory. Unsupported content (HTML disguised as `.xls`, RTF, CSV, ODF, `.xlsb`…) is skipped with an explanation of how to proceed.
+
 Text documents:
 
 ```
@@ -38,7 +40,7 @@ Spreadsheets (XLS / XLSX / XLSM) skip the PDF route:
 | Skill | Invocation | What it does |
 |-------|-----------|--------------|
 | `install` | `/p4cc-converter:install` | Installs the catalog copy, then runs `check`. |
-| `check` | `/p4cc-converter:check` | Read-only check of qpdf, python3, libreoffice, openpyxl, optional OCR tools and the conversion scripts. Reports how to fix anything missing. |
+| `check` | `/p4cc-converter:check` | Read-only check of qpdf, python3, libreoffice, openpyxl, optional OCR tools and the conversion and detection scripts. Reports how to fix anything missing. |
 | `any-to-md` | `/p4cc-converter:any-to-md [path]` | Converts documents to structured Markdown (OCR for scanned pages, direct table extraction for spreadsheets) |
 
 ## Requirements

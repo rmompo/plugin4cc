@@ -857,10 +857,14 @@
       "description": "Converts documents to Markdown (PDF, DOC, DOCX, PPT, PPTX) using a multi-step local tool pipeline.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "spec": "specs/p4cc-converter.md",
       "path": "plugins/p4cc-converter",
       "changelog": [
+        {
+          "version": "1.0.10",
+          "changes": "any-to-md: detect real file format by content (detect-format.py), handle wrong/missing extensions and unsupported content; check: verify detect-format.py"
+        },
         {
           "version": "1.0.9",
           "changes": "any-to-md: support XLS/XLSX/XLSM via openpyxl (Step 4c, xlsx-to-md.py); check: verify openpyxl"
@@ -931,8 +935,12 @@
         },
         {
           "name": "any-to-md",
-          "version": 9,
+          "version": 10,
           "changelog": [
+            {
+              "version": 10,
+              "changes": "Detect real format by content instead of extension (Step 3)"
+            },
             {
               "version": 9,
               "changes": "Add spreadsheet support (XLS/XLSX/XLSM) via openpyxl"
@@ -957,8 +965,12 @@
         },
         {
           "name": "check",
-          "version": 9,
+          "version": 10,
           "changelog": [
+            {
+              "version": 10,
+              "changes": "Verify detect-format.py"
+            },
             {
               "version": 9,
               "changes": "Verify openpyxl and xlsx-to-md.py"

@@ -1,7 +1,7 @@
 ---
 name: check
 description: Read-only verification of the p4cc-converter infrastructure — folders, files, external tools and plugin resources. Reports status and tells how to install anything missing. Also invoked explicitly as /p4cc-converter:check.
-version: 9
+version: 10
 allowed-tools: [Bash]
 ---
 
@@ -48,7 +48,7 @@ Files shipped with the plugin must be present in the plugin cache:
 ```bash
 PLUGIN_CACHE=$(ls -d ~/.claude/plugins/cache/plugin4cc/p4cc-converter/*/ 2>/dev/null | sort -V | tail -1)
 [ -z "$PLUGIN_CACHE" ] && echo "❌ plugin cache not found"
-for f in resources/scripts/all-to-md-consolidate.py resources/scripts/xlsx-to-md.py; do
+for f in resources/scripts/all-to-md-consolidate.py resources/scripts/xlsx-to-md.py resources/scripts/detect-format.py; do
   [ -f "$PLUGIN_CACHE$f" ] && echo "✅ $f" || echo "❌ $f"
 done
 ```
