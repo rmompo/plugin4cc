@@ -193,18 +193,31 @@ Auto — fires at session start via the p4cc-core agent.
 ## Skill: `install`
 
 ### Purpose
-
-Verify that all external tools required by p4cc-core skills are installed and reachable in `PATH`. Currently checks `git` (required by `git-commit`). Prints a status table with install instructions for any missing dependency.
+Creates `~/.p4cc/` and installs the marketplace `catalog.json` copy, then runs `check`.
 
 ### Invocation
-
-```bash
+```
 /p4cc-core:install
 ```
 
 ### Non-Goals
-- Does not install tools automatically
-- Does not verify tool versions — only presence (`which`)
+- Does not install external tools automatically
+
+---
+
+## Skill: `check`
+
+### Purpose
+Read-only verification: `~/.p4cc/` and a valid, up-to-date `catalog.json`; the plugin cache; and `git` (required by `git-commit`) with its version. Prints a status table with install instructions for anything missing.
+
+### Invocation
+```
+/p4cc-core:check
+```
+
+### Non-Goals
+- Does not install external tools automatically
+- `check` never modifies anything
 
 ---
 
@@ -212,6 +225,7 @@ Verify that all external tools required by p4cc-core skills are installed and re
 
 | Version | Changes |
 |---------|---------|
+| 1.2.31 | Add `check` skill; `install` now creates folders/files and delegates verification to `check` |
 | 1.2.18 | Add `git-sanitize` skill — session-start CRLF hygiene enforcer |
 | 1.2.17 | `sanitize`: update argument-hint to `[path]` |
 | 1.2.16 | `sanitize`: new skill (moved from p4cc-plugin) |

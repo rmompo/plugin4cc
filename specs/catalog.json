@@ -12,10 +12,14 @@
       "description": "Core productivity plugin: behavioral directives (P4CCD), intelligent model routing via subagents, and Conventional Commits enforcement.",
       "category": "productivity",
       "status": "stable",
-      "version": "1.2.30",
+      "version": "1.2.31",
       "spec": "specs/p4cc-core.md",
       "path": "plugins/p4cc-core",
       "changelog": [
+        {
+          "version": "1.2.31",
+          "changes": "Add check skill; install now only installs and delegates verification to check"
+        },
         {
           "version": "1.2.30",
           "changes": "model-route: fix: delegate via Agent tool, not Skill tool"
@@ -223,8 +227,12 @@
         },
         {
           "name": "install",
-          "version": 15,
+          "version": 31,
           "changelog": [
+            {
+              "version": 31,
+              "changes": "install now creates folders/files and delegates verification to check"
+            },
             {
               "version": 15,
               "changes": "Rename skill setup → install"
@@ -279,6 +287,16 @@
             {
               "version": 27,
               "changes": "Initial release"
+            }
+          ]
+        },
+        {
+          "name": "check",
+          "version": 31,
+          "changelog": [
+            {
+              "version": 31,
+              "changes": "Initial release — read-only check of folders, files and tools"
             }
           ]
         }
@@ -399,13 +417,17 @@
       "description": "AI-powered CV generation and management — multi-user profiles, job offer adaptation, and multi-format export.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.16",
+      "version": "1.0.17",
       "spec": "specs/p4cc-ccvv.md",
       "path": "plugins/p4cc-ccvv",
       "scopes": [
         "global"
       ],
       "changelog": [
+        {
+          "version": "1.0.17",
+          "changes": "Add check skill; install now only installs and delegates verification to check"
+        },
         {
           "version": "1.0.16",
           "changes": "setup: add plugin dep check with unified type table"
@@ -448,6 +470,10 @@
           "name": "install",
           "version": 17,
           "changelog": [
+            {
+              "version": 17,
+              "changes": "install now creates folders/files and delegates verification to check"
+            },
             {
               "version": 17,
               "changes": "Rename skill setup → install"
@@ -545,6 +571,16 @@
             {
               "version": 6,
               "changes": "Initial release"
+            }
+          ]
+        },
+        {
+          "name": "check",
+          "version": 17,
+          "changelog": [
+            {
+              "version": 17,
+              "changes": "Initial release — read-only check of folders, files and tools"
             }
           ]
         }
@@ -821,10 +857,14 @@
       "description": "Converts documents to Markdown (PDF, DOC, DOCX, PPT, PPTX) using a multi-step local tool pipeline.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "spec": "specs/p4cc-converter.md",
       "path": "plugins/p4cc-converter",
       "changelog": [
+        {
+          "version": "1.0.7",
+          "changes": "Add check skill; install now only installs and delegates verification to check"
+        },
         {
           "version": "1.0.6",
           "changes": "setup: add plugin dep check with unified type table"
@@ -861,6 +901,10 @@
           "changelog": [
             {
               "version": 7,
+              "changes": "install now creates folders/files and delegates verification to check"
+            },
+            {
+              "version": 7,
               "changes": "Rename skill setup → install"
             },
             {
@@ -894,6 +938,16 @@
               "changes": "Initial release — 6-step conversion pipeline (libreoffice → qpdf → LLM → python → review)"
             }
           ]
+        },
+        {
+          "name": "check",
+          "version": 7,
+          "changelog": [
+            {
+              "version": 7,
+              "changes": "Initial release — read-only check of folders, files and tools"
+            }
+          ]
         }
       ],
       "dependencies": [
@@ -919,7 +973,7 @@
       "description": "Web crawler and documentation extractor: crawls sites (static or SPA/Storybook), filters by topic, downloads attachments, and generates structured Markdown output.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "spec": "specs/p4cc-crawler.md",
       "path": "plugins/p4cc-crawler",
       "scopes": [
@@ -939,6 +993,10 @@
       ],
       "changelog": [
         {
+          "version": "1.0.3",
+          "changes": "Add check skill; install now only installs and delegates verification to check"
+        },
+        {
           "version": "1.0.2",
           "changes": "Add extract skill — full pipeline: configure, crawl, dedup, filter, download, generate"
         },
@@ -950,8 +1008,12 @@
       "skills": [
         {
           "name": "install",
-          "version": 2,
+          "version": 3,
           "changelog": [
+            {
+              "version": 3,
+              "changes": "install now creates folders/files and delegates verification to check"
+            },
             {
               "version": 2,
               "changes": "Rename skill setup → install"
@@ -969,6 +1031,16 @@
             {
               "version": 2,
               "changes": "Initial release — full crawl-to-markdown pipeline"
+            }
+          ]
+        },
+        {
+          "name": "check",
+          "version": 3,
+          "changelog": [
+            {
+              "version": 3,
+              "changes": "Initial release — read-only check of folders, files and tools"
             }
           ]
         }

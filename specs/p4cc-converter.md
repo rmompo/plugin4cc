@@ -15,19 +15,31 @@ The output is a clean `.md` file with YAML frontmatter, proper heading hierarchy
 ## Skill: `install`
 
 ### Purpose
-
-Verifies that all required external tools are installed and meet the minimum version constraints. Prints a status table and install instructions for any missing tool.
+Installs the `catalog.json` copy, then runs `check`.
 
 ### Invocation
-
 ```
 /p4cc-converter:install
 ```
 
 ### Non-Goals
+- Does not install tools automatically
 
-- Does not install tools automatically.
-- Does not modify any system configuration.
+---
+
+## Skill: `check`
+
+### Purpose
+Read-only verification of qpdf, python3, libreoffice (version constraints) and the shipped consolidation script. Prints a status table and install instructions for anything missing.
+
+### Invocation
+```
+/p4cc-converter:check
+```
+
+### Non-Goals
+- Does not install tools automatically
+- `check` never modifies anything
 
 ---
 
@@ -95,6 +107,7 @@ split_tool: qpdf
 
 | Version | Changes |
 |---------|---------|
+| 1.0.7 | Add `check` skill; `install` now creates folders/files and delegates verification to `check` |
 | 1.0.4 | Fix qpdf constraint to >=10.0.0; fix SOURCE_FOLDER / OUTPUT_PATH variable consistency; clarify inventory loop and Step 6.1 tool; document AGENT_ALL_TO_MD_OUTPUT env var |
 | 1.0.3 | Add input-path, glob/file selection and output-path parameters to any-to-md |
 | 1.0.2 | Add `any-to-md` skill — full 6-step conversion pipeline |

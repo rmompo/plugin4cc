@@ -15,15 +15,31 @@ All data is stored globally at `~/.p4cc/p4cc-ccvv/` following the p4cc-* scope c
 ## Skill: `install`
 
 ### Purpose
-Verifies that all required external tools (pandoc, pdflatex, python3) are available and correctly versioned.
+Creates `~/.p4cc/p4cc-ccvv/profiles/` and the `catalog.json` copy, then runs `check`.
 
 ### Invocation
 ```
 /p4cc-ccvv:install
 ```
 
-### Output
-Markdown table with dependency status and install instructions (Bash + PowerShell) for any missing tool.
+### Non-Goals
+- Does not install external tools automatically
+
+---
+
+## Skill: `check`
+
+### Purpose
+Read-only verification: storage folders (and `input/`, `data/`, `output/` of each profile), shipped templates/schemas, and tools pandoc, pdflatex, python3 with version constraints. Prints a table plus install instructions (Bash + PowerShell).
+
+### Invocation
+```
+/p4cc-ccvv:check
+```
+
+### Non-Goals
+- Does not install external tools automatically
+- `check` never modifies anything
 
 ---
 
@@ -108,4 +124,5 @@ Converts a CV draft to a final output format (PDF, DOCX, HTML, MD) in the select
 
 | Version | Changes |
 |---------|---------|
+| 1.0.17 | Add `check` skill; `install` now creates folders/files and delegates verification to `check` |
 | 1.0.6 | Initial release with 6 skills |

@@ -1,156 +1,34 @@
 ---
 name: install
-description: Verifies that all external dependencies required by p4cc-crawler are installed — system tools (python3, curl) and pip packages (beautifulsoup4, html2text). Reports status with install instructions for each missing dependency. Also invoked explicitly as /p4cc-crawler:install.
-version: 2
+description: Installs the p4cc-crawler infrastructure — creates the required folders and files — then runs the check. Tools are never installed automatically; missing ones are reported with install instructions. Also invoked explicitly as /p4cc-crawler:install.
+version: 3
 allowed-tools: [Bash]
 ---
 
 # p4cc-crawler Install
 
-Verifies that all required tools and Python packages are available. Safe to re-run at any time.
+Creates the folders and files p4cc-crawler needs, then verifies the result with `/p4cc-crawler:check`. Idempotent — safe to re-run at any time. External tools are **not** installed automatically: `/p4cc-crawler:check` reports each missing one with its install command.
 
 ---
 
-## Step 1 — Read system dependencies from catalog
+## Step 1 — Install / update ~/.p4cc/catalog.json
+
+Copy the latest `catalog.json` from the marketplace to the global user path.
 
 ```bash
-CATALOG=~/.p4cc/catalog.json
-# Fallback: marketplace install path (used before ~/.p4cc/catalog.json is created)
-[ ! -f "$CATALOG" ] && CATALOG=~/.claude/plugins/marketplaces/plugin4cc/specs/catalog.json
-```
-
-Read the full `dependencies` array for p4cc-crawler from `catalog.json`. Currently required:
-
-| Type | Name | Required |
-|------|------|----------|
-| `tool` | `python3` | `>=3.8.0` |
-| `tool` | `curl` | `*` |
-
-For each dependency, check by type:
-
-| Type | How to check |
-|------|-------------|
-| `tool` | `which <name> 2>/dev/null && <name> --version 2>&1 \| head -1` — then verify version constraint |
-| `plugin` | `ls ~/.claude/plugins/cache/plugin4cc/<name>/ 2>/dev/null` — installed if directory has at least one entry |
-
-```bash
-which python3 && python3 --version 2>&1
-which curl    && curl --version 2>&1 | head -1
+_src=$(find ~/.claude/plugins/marketplaces -path "*/plugin4cc*/specs/catalog.json" 2>/dev/null | head -1)
+if [ -n "$_src" ]; then
+  mkdir -p ~/.p4cc
+  cp "$_src" ~/.p4cc/catalog.json
+  echo "✅ ~/.p4cc/catalog.json installed from: $_src"
+else
+  echo "⚠️  Marketplace catalog not found — add the marketplace first:"
+  echo "   claude plugins marketplace add rmompo/plugin4cc"
+fi
 ```
 
 ---
 
-## Step 2 — Check pip packages
+## Step 2 — Verify
 
-These packages are required at runtime but are not system binaries — checked separately:
-
-```bash
-python3 -c "import bs4; print(bs4.__version__)"     2>/dev/null
-python3 -c "import html2text; print(html2text.__version__)" 2>/dev/null
-```
-
-| Package | Required | How to check |
-|---------|----------|-------------|
-| `beautifulsoup4` | required | `import bs4` |
-| `html2text` | required | `import html2text` |
-
----
-
-## Step 3 — Check optional: playwright (SPA mode)
-
-```bash
-python3 -m playwright --version 2>/dev/null
-```
-
-Playwright is **optional** — only needed for SPA sites (Angular, React, Storybook). Static sites use `curl` only.
-
----
-
-## Step 4 — Print unified status table
-
-```
-══════════════════════════════════════════
-  p4cc-crawler SETUP CHECK
-══════════════════════════════════════════
-```
-
-System tools (from catalog):
-
-| Type | Dependency | Required | Found | Status |
-|------|------------|----------|-------|--------|
-| tool | python3 | >=3.8.0 | 3.11.2 | ✅ |
-| tool | curl | * | 7.88.1 | ✅ |
-
-Pip packages:
-
-| Package | Found | Status |
-|---------|-------|--------|
-| beautifulsoup4 | 4.12.2 | ✅ |
-| html2text | 2020.1.16 | ✅ |
-
-Optional:
-
-| Component | Found | Status |
-|-----------|-------|--------|
-| playwright | 1.42.0 | ✅ (SPA mode available) |
-
----
-
-## Step 5 — Install instructions for each ❌
-
-### python3 (if missing)
-
-**Bash (Linux/WSL):**
-```bash
-sudo apt install python3
-```
-
-**PowerShell (Windows):**
-```powershell
-winget install Python.Python.3
-```
-
-### curl (if missing)
-
-**Bash (Linux/WSL):**
-```bash
-sudo apt install curl
-```
-
-**PowerShell (Windows):**
-```powershell
-winget install cURL.cURL
-```
-
-### beautifulsoup4 (if missing)
-
-```bash
-pip install beautifulsoup4
-```
-
-### html2text (if missing)
-
-```bash
-pip install html2text
-```
-
-### playwright (if missing — optional)
-
-```bash
-pip install playwright && playwright install chromium
-```
-
----
-
-## Step 6 — Final verdict
-
-If all required dependencies ✅:
-```
-✅ p4cc-crawler is ready. Run /p4cc-crawler:extract to start a crawl session.
-   Note: playwright not found — SPA mode unavailable (static sites work fine).
-```
-
-If any required dependency ❌:
-```
-⚠️  Install missing dependencies before using p4cc-crawler.
-```
+Run `/p4cc-crawler:check` and show its report. If it lists missing tools, print their install instructions and ask the user to re-run `/p4cc-crawler:check` once installed.

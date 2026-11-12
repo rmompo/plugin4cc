@@ -19,7 +19,8 @@ All data lives in `~/.p4cc/p4cc-ccvv/`:
 
 | Skill | Invocation | What it does |
 |-------|------------|--------------|
-| `install` | `/p4cc-ccvv:install` | Verify dependencies (pandoc, pdflatex, python3) |
+| `install` | `/p4cc-ccvv:install` | Creates `~/.p4cc/p4cc-ccvv/profiles/` and the catalog copy, then runs `check`. |
+| `check` | `/p4cc-ccvv:check` | Read-only check of storage folders, templates/schemas, and pandoc, pdflatex, python3. Reports how to fix anything missing. |
 | `profile-gather` | `/p4cc-ccvv:profile-gather` | Extract profile data from a source CV file |
 | `profile-update` | `/p4cc-ccvv:profile-update` | Update an existing profile with new data |
 | `generate` | `/p4cc-ccvv:generate` | Generate an adapted CV draft for a job position |
@@ -29,7 +30,8 @@ All data lives in `~/.p4cc/p4cc-ccvv/`:
 ## Typical workflow
 
 ```
-1. /p4cc-ccvv:install           → verify tools
+1. /p4cc-ccvv:install           → create folders
+   /p4cc-ccvv:check             → verify folders and tools
 2. /p4cc-ccvv:profile-gather  → extract profile from your CV
 3. /p4cc-ccvv:generate        → create adapted CV for a job offer
    (review and edit the generated draft)

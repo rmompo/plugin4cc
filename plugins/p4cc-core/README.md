@@ -104,10 +104,19 @@ Ensures every git repo has correct line-ending hygiene. At session start, silent
 
 ### 🔧 `install`
 
-Verifies that all external tools required by p4cc-core skills are installed and available in PATH. Reports status with install instructions for each missing dependency.
+Creates `~/.p4cc/` and installs the marketplace `catalog.json` copy, then runs `check`.
 
 **Invocation:**
 - Explicit — `/p4cc-core:install`
+
+---
+
+### 🔍 `check`
+
+Read-only verification of the p4cc-core infrastructure: `~/.p4cc/` and `catalog.json`, plugin cache, and external tools (`git`) in PATH. Reports status with install instructions for anything missing.
+
+**Invocation:**
+- Explicit — `/p4cc-core:check`
 
 ---
 

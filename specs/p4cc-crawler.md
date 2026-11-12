@@ -15,7 +15,7 @@ Designed for intranet documentation extraction. Supports authenticated sites (Jo
 ## Skill: `install`
 
 ### Purpose
-Verifies that all runtime dependencies are installed: system tools (python3, curl) from catalog, and pip packages (beautifulsoup4, html2text). Reports each dependency with its status and install instructions. Also checks for the optional playwright package (required only for SPA mode).
+Installs the `catalog.json` copy, then runs `check`.
 
 ### Invocation
 ```
@@ -23,8 +23,23 @@ Verifies that all runtime dependencies are installed: system tools (python3, cur
 ```
 
 ### Non-Goals
-- Does not install dependencies automatically — reports and guides only
-- Does not validate crawl configuration
+- Does not install dependencies automatically
+
+---
+
+## Skill: `check`
+
+### Purpose
+Read-only verification of python3, curl (from catalog), pip packages beautifulsoup4 and html2text, the optional playwright (SPA mode) and the shipped scripts. Reports status and install instructions.
+
+### Invocation
+```
+/p4cc-crawler:check
+```
+
+### Non-Goals
+- Does not install dependencies automatically
+- `check` never modifies anything
 
 ---
 
@@ -49,5 +64,6 @@ Orchestrates the full documentation extraction pipeline in 8 phases: configure (
 
 | Version | Changes |
 |---------|---------|
+| 1.0.3 | Add `check` skill; `install` now creates folders/files and delegates verification to `check` |
 | 1.0.2 | Add `extract` skill — full pipeline: configure, crawl, dedup, filter, download, generate |
 | 1.0.1 | Initial release — `setup` skill |

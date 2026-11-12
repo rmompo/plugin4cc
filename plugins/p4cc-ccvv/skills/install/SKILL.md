@@ -1,105 +1,45 @@
 ---
 name: install
-description: Verifies that all external dependencies (tools and plugins) required by p4cc-ccvv are installed and meet version constraints. Reports status with install instructions for each missing dependency. Also invoked explicitly as /p4cc-ccvv:install.
+description: Installs the p4cc-ccvv infrastructure — creates the required folders and files — then runs the check. Tools are never installed automatically; missing ones are reported with install instructions. Also invoked explicitly as /p4cc-ccvv:install.
 version: 17
 allowed-tools: [Bash]
 ---
 
 # p4cc-ccvv Install
 
-Verifies that all required tools are available and prints a status report. Safe to re-run at any time.
+Creates the folders and files p4cc-ccvv needs, then verifies the result with `/p4cc-ccvv:check`. Idempotent — safe to re-run at any time. External tools are **not** installed automatically: `/p4cc-ccvv:check` reports each missing one with its install command.
 
 ---
 
-## Step 1 — Check dependencies
+## Step 1 — Install / update ~/.p4cc/catalog.json
 
-Read the full `dependencies` array from `catalog.json` for p4cc-ccvv. Collect all entries, preserving their `type`.
-
-Currently required:
-
-| Type | Name | Required |
-|------|------|----------|
-| `tool` | `pandoc` | `>=2.0.0` |
-| `tool` | `pdflatex` | `*` |
-| `tool` | `python3` | `>=3.8.0` |
-
-For each dependency, check by type:
-
-| Type | How to check |
-|------|-------------|
-| `tool` | `which <name> 2>/dev/null && <name> --version 2>&1 \| head -1` — then verify version constraint |
-| `plugin` | `ls ~/.claude/plugins/cache/plugin4cc/<name>/ 2>/dev/null` — installed if directory has at least one entry |
+Copy the latest `catalog.json` from the marketplace to the global user path.
 
 ```bash
-which pandoc   && pandoc --version   2>&1 | head -1
-which pdflatex && pdflatex --version 2>&1 | head -1
-which python3  && python3 --version  2>&1
-```
-
-Parse the version string from each tool output.
-
----
-
-## Step 2 — Evaluate constraints
-
-For `type: "tool"` entries, compare found version against the `version` constraint from catalog. For `type: "plugin"` entries, only presence is checked — no version comparison.
-
----
-
-## Step 3 — Print Markdown status table
-
-```markdown
-| Type | Dependency | Required | Found   | Status |
-|------|------------|----------|---------|--------|
-| tool | pandoc     | >=2.0.0  | 3.1.3   | ✅     |
-| tool | pdflatex   | *        | —       | ❌     |
-| tool | python3    | >=3.8.0  | 3.11.2  | ✅     |
+_src=$(find ~/.claude/plugins/marketplaces -path "*/plugin4cc*/specs/catalog.json" 2>/dev/null | head -1)
+if [ -n "$_src" ]; then
+  mkdir -p ~/.p4cc
+  cp "$_src" ~/.p4cc/catalog.json
+  echo "✅ ~/.p4cc/catalog.json installed from: $_src"
+else
+  echo "⚠️  Marketplace catalog not found — add the marketplace first:"
+  echo "   claude plugins marketplace add rmompo/plugin4cc"
+fi
 ```
 
 ---
 
-## Step 4 — Install instructions for each ❌
+## Step 2 — Create the storage folders
 
-### pdflatex
-
-**Bash (Linux/WSL):**
 ```bash
-sudo apt install texlive-latex-base texlive-latex-recommended texlive-fonts-recommended
+mkdir -p ~/.p4cc/p4cc-ccvv/profiles
+echo "✅ ~/.p4cc/p4cc-ccvv/profiles/"
 ```
 
-**PowerShell (Windows):**
-```powershell
-winget install MiKTeX.MiKTeX
-```
-
-### pandoc (if missing)
-
-**Bash (Linux/WSL):**
-```bash
-sudo apt install pandoc
-```
-
-**PowerShell (Windows):**
-```powershell
-winget install JohnMacFarlane.Pandoc
-```
-
-### python3 (if missing)
-
-**Bash (Linux/WSL):**
-```bash
-sudo apt install python3
-```
-
-**PowerShell (Windows):**
-```powershell
-winget install Python.Python.3
-```
+Profile subfolders (`input/`, `data/`, `output/`) are created per user by `/p4cc-ccvv:profile-gather`.
 
 ---
 
-## Step 5 — Final status
+## Step 3 — Verify
 
-If all ✅ → print: `✅ p4cc-ccvv is ready. Storage root: ~/.p4cc/p4cc-ccvv/`
-
-If any ❌ → print: `⚠️ Install missing dependencies before using p4cc-ccvv.`
+Run `/p4cc-ccvv:check` and show its report. If it lists missing tools, print their install instructions and ask the user to re-run `/p4cc-ccvv:check` once installed.

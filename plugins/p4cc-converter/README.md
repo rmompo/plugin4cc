@@ -22,7 +22,8 @@ Input (PDF/DOC/DOCX/PPT/PPTX)
 
 | Skill | Invocation | What it does |
 |-------|-----------|--------------|
-| `install` | `/p4cc-converter:install` | Verifies that qpdf, python3, and libreoffice are installed |
+| `install` | `/p4cc-converter:install` | Installs the catalog copy, then runs `check`. |
+| `check` | `/p4cc-converter:check` | Read-only check of qpdf, python3, libreoffice and the consolidation script. Reports how to fix anything missing. |
 | `any-to-md` | `/p4cc-converter:any-to-md [path]` | Converts documents to structured Markdown |
 
 ## Requirements
@@ -36,8 +37,9 @@ Input (PDF/DOC/DOCX/PPT/PPTX)
 ## Quick start
 
 ```bash
-# 1. Verify dependencies
+# 1. Install and verify dependencies
 /p4cc-converter:install
+/p4cc-converter:check
 
 # 2. Convert a document
 /p4cc-converter:any-to-md input/docs/manual.docx
