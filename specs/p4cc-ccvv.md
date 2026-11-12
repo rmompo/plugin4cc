@@ -124,5 +124,6 @@ Converts a CV draft to a final output format (PDF, DOCX, HTML, MD) in the select
 
 | Version | Changes |
 |---------|---------|
+| 1.0.18 | `check`: raise python3 minimum to >=3.10.0 |
 | 1.0.17 | Add `check` skill; `install` now creates folders/files and delegates verification to `check` |
 | 1.0.6 | Initial release with 6 skills |

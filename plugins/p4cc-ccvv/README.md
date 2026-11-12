@@ -49,4 +49,4 @@ claude plugins install p4cc-ccvv
 
 - Pandoc >=2.0.0
 - pdflatex (TeX Live or MiKTeX)
-- Python 3 >=3.8.0
+- Python 3 >=3.10.0

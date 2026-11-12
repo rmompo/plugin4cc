@@ -64,6 +64,7 @@ Orchestrates the full documentation extraction pipeline in 8 phases: configure (
 
 | Version | Changes |
 |---------|---------|
+| 1.0.4 | `check`: raise python3 minimum to >=3.10.0 |
 | 1.0.3 | Add `check` skill; `install` now creates folders/files and delegates verification to `check` |
 | 1.0.2 | Add `extract` skill — full pipeline: configure, crawl, dedup, filter, download, generate |
 | 1.0.1 | Initial release — `setup` skill |

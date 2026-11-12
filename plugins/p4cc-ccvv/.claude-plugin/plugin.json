@@ -1,6 +1,6 @@
 {
   "name": "p4cc-ccvv",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "AI-powered CV generation and management — multi-user profiles, job offer adaptation, and multi-format export.",
   "author": {
     "name": "rmompo",
@@ -20,7 +20,7 @@
     },
     {
       "tool": "python3",
-      "version": ">=3.8.0"
+      "version": ">=3.10.0"
     }
   ]
 }

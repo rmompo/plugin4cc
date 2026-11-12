@@ -1,7 +1,7 @@
 ---
 name: check
 description: Read-only verification of the p4cc-ccvv infrastructure — folders, files, external tools and plugin resources. Reports status and tells how to install anything missing. Also invoked explicitly as /p4cc-ccvv:check.
-version: 17
+version: 18
 allowed-tools: [Bash]
 ---
 
@@ -89,7 +89,7 @@ Currently required:
 |------|------|----------|---------|
 | `tool` | `pandoc` | `>=2.0.0` | `export` |
 | `tool` | `pdflatex` | `*` | `export` (PDF) |
-| `tool` | `python3` | `>=3.8.0` | `profile-gather` |
+| `tool` | `python3` | `>=3.10.0` | `profile-gather` |
 
 ```bash
 which pandoc && pandoc --version | head -1 2>&1

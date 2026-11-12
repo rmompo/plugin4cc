@@ -1,7 +1,7 @@
 ---
 name: check
 description: Read-only verification of the p4cc-crawler infrastructure — folders, files, external tools and plugin resources. Reports status and tells how to install anything missing. Also invoked explicitly as /p4cc-crawler:check.
-version: 3
+version: 4
 allowed-tools: [Bash]
 ---
 
@@ -74,7 +74,7 @@ Currently required:
 
 | Type | Name | Required | Used by |
 |------|------|----------|---------|
-| `tool` | `python3` | `>=3.8.0` | all scripts |
+| `tool` | `python3` | `>=3.10.0` | all scripts |
 | `tool` | `curl` | `*` | `extract` (static sites) |
 
 ```bash
@@ -115,7 +115,7 @@ One table per area (Folders, Plugin resources, Tools, Python packages):
 | Area | Item | Required | Found | Status |
 |------|------|----------|-------|--------|
 | folder | `~/.p4cc/` | exists | exists | ✅ |
-| tool | `python3` | `>=3.8.0` | — | ❌ |
+| tool | `python3` | `>=3.10.0` | — | ❌ |
 
 - ✅ = present and version constraint satisfied
 - ❌ = missing or below the minimum version

@@ -48,7 +48,7 @@ Spreadsheets (XLS / XLSX / XLSM) skip the PDF route:
 | Tool | Version | Purpose |
 |------|---------|---------|
 | `qpdf` | ≥11.0.0 | Split PDF into chunks |
-| `python3` | ≥3.8.0 | Consolidation script |
+| `python3` | ≥3.10.0 | Consolidation script |
 | `libreoffice` | ≥7.0.0 | Convert DOC/DOCX/PPT/PPTX to PDF and XLS to XLSX |
 | `openpyxl` *(only for spreadsheets)* | any | Read XLSX/XLSM (`sudo apt install python3-openpyxl`) |
 | `ocrmypdf` + `tesseract` *(optional)* | any | OCR for scanned or image-only pages |

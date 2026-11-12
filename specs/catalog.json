@@ -425,13 +425,17 @@
       "description": "AI-powered CV generation and management — multi-user profiles, job offer adaptation, and multi-format export.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.17",
+      "version": "1.0.18",
       "spec": "specs/p4cc-ccvv.md",
       "path": "plugins/p4cc-ccvv",
       "scopes": [
         "global"
       ],
       "changelog": [
+        {
+          "version": "1.0.18",
+          "changes": "check: raise python3 minimum to >=3.10.0"
+        },
         {
           "version": "1.0.17",
           "changes": "Add check skill; install now only installs and delegates verification to check"
@@ -584,8 +588,12 @@
         },
         {
           "name": "check",
-          "version": 17,
+          "version": 18,
           "changelog": [
+            {
+              "version": 18,
+              "changes": "raise python3 minimum to >=3.10.0"
+            },
             {
               "version": 17,
               "changes": "Initial release — read-only check of folders, files and tools"
@@ -607,7 +615,7 @@
         {
           "type": "tool",
           "name": "python3",
-          "version": ">=3.8.0"
+          "version": ">=3.10.0"
         }
       ]
     },
@@ -616,10 +624,14 @@
       "description": "Marketplace lifecycle tooling: create and manage plugins and skills with automatic version tracking.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.1.44",
+      "version": "1.1.45",
       "spec": "specs/p4cc-plugin.md",
       "path": "plugins/p4cc-plugin",
       "changelog": [
+        {
+          "version": "1.1.45",
+          "changes": "create: example tool dependency uses python3 >=3.10.0"
+        },
         {
           "version": "1.1.44",
           "changes": "update: work with any marketplace: resolve repo, cache and global catalog dynamically"
@@ -756,8 +768,12 @@
       "skills": [
         {
           "name": "create",
-          "version": 37,
+          "version": 45,
           "changelog": [
+            {
+              "version": 45,
+              "changes": "example tool dependency uses python3 >=3.10.0"
+            },
             {
               "version": 37,
               "changes": "work with any marketplace: resolve repo, marketplace name, cache and global catalog dynamically; homepage and author from marketplace data"
@@ -945,10 +961,14 @@
       "description": "Converts documents to Markdown (PDF, DOC, DOCX, PPT, PPTX) using a multi-step local tool pipeline.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "spec": "specs/p4cc-converter.md",
       "path": "plugins/p4cc-converter",
       "changelog": [
+        {
+          "version": "1.0.11",
+          "changes": "check: raise python3 minimum to >=3.10.0"
+        },
         {
           "version": "1.0.10",
           "changes": "any-to-md: detect real file format by content (detect-format.py), handle wrong/missing extensions and unsupported content; check: verify detect-format.py"
@@ -1053,8 +1073,12 @@
         },
         {
           "name": "check",
-          "version": 10,
+          "version": 11,
           "changelog": [
+            {
+              "version": 11,
+              "changes": "raise python3 minimum to >=3.10.0"
+            },
             {
               "version": 10,
               "changes": "Verify detect-format.py"
@@ -1083,7 +1107,7 @@
         {
           "type": "tool",
           "name": "python3",
-          "version": ">=3.8.0"
+          "version": ">=3.10.0"
         },
         {
           "type": "tool",
@@ -1097,7 +1121,7 @@
       "description": "Web crawler and documentation extractor: crawls sites (static or SPA/Storybook), filters by topic, downloads attachments, and generates structured Markdown output.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "spec": "specs/p4cc-crawler.md",
       "path": "plugins/p4cc-crawler",
       "scopes": [
@@ -1107,7 +1131,7 @@
         {
           "type": "tool",
           "name": "python3",
-          "version": ">=3.8.0"
+          "version": ">=3.10.0"
         },
         {
           "type": "tool",
@@ -1116,6 +1140,10 @@
         }
       ],
       "changelog": [
+        {
+          "version": "1.0.4",
+          "changes": "check: raise python3 minimum to >=3.10.0"
+        },
         {
           "version": "1.0.3",
           "changes": "Add check skill; install now only installs and delegates verification to check"
@@ -1160,8 +1188,12 @@
         },
         {
           "name": "check",
-          "version": 3,
+          "version": 4,
           "changelog": [
+            {
+              "version": 4,
+              "changes": "raise python3 minimum to >=3.10.0"
+            },
             {
               "version": 3,
               "changes": "Initial release — read-only check of folders, files and tools"

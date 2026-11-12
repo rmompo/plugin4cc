@@ -1,7 +1,7 @@
 ---
 name: check
 description: Read-only verification of the p4cc-converter infrastructure — folders, files, external tools and plugin resources. Reports status and tells how to install anything missing. Also invoked explicitly as /p4cc-converter:check.
-version: 10
+version: 11
 allowed-tools: [Bash]
 ---
 
@@ -75,7 +75,7 @@ Currently required:
 | Type | Name | Required | Used by |
 |------|------|----------|---------|
 | `tool` | `qpdf` | `>=10.0.0` | `any-to-md` |
-| `tool` | `python3` | `>=3.8.0` | `any-to-md` |
+| `tool` | `python3` | `>=3.10.0` | `any-to-md` |
 | `tool` | `libreoffice` | `>=7.0.0` | `any-to-md` (non-PDF inputs only) |
 
 ```bash

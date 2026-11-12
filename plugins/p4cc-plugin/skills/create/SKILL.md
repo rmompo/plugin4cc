@@ -1,7 +1,7 @@
 ---
 name: create
 description: Scaffolds a new plugin with all required files and registers it in every catalog. Also invoked explicitly as /p4cc-plugin:create with the plugin name and optional skill names.
-version: 37
+version: 45
 argument-hint: "<plugin> [skill1 skill2 ...]"
 allowed-tools: [Bash, Read, Edit, Write, AskUserQuestion]
 ---
@@ -156,7 +156,7 @@ If not provided as arguments, use **AskUserQuestion** to collect:
 4. Initial status (default: `beta`)
 5. Scopes (optional — select from `global`, `local`, `local-gitignore`, or none)
 6. Dependencies (optional):
-   - **Tool dependencies** — binary name + version constraint. Operators: `=x.y.z`, `>=x.y.z`, `>x.y.z`, `<=x.y.z`, `<x.y.z`, `>=x.y.z <a.b.c`, `*`. Example: `pandoc >=2.0.0`, `python3 >=3.8.0`
+   - **Tool dependencies** — binary name + version constraint. Operators: `=x.y.z`, `>=x.y.z`, `>x.y.z`, `<=x.y.z`, `<x.y.z`, `>=x.y.z <a.b.c`, `*`. Example: `pandoc >=2.0.0`, `python3 >=3.10.0`
    - **Plugin dependencies** — other plugins of this marketplace this plugin relies on. Example: `p4cc-converter`. No version — always latest.
 7. Skill name(s) and brief purpose of each (optional — can add later with `skill-add`)
 ### Naming conventions

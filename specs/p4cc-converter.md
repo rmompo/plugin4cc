@@ -139,7 +139,7 @@ When OCR was applied: `ocr: true`, `ocr_tool: ocrmypdf`, `ocr_lang: <lang>`.
 | Tool | Required version | Use | Optional? |
 |------|-----------------|-----|-----------|
 | `qpdf` | `>=10.0.0` | PDF splitting | No |
-| `python3` | `>=3.8.0` | Consolidation script | No |
+| `python3` | `>=3.10.0` | Consolidation script | No |
 | `libreoffice` | `>=7.0.0` | DOC/DOCX/PPT/PPTX → PDF, XLS → XLSX | Only if non-PDF inputs |
 | `openpyxl` (Python package) | any | Read XLSX/XLSM | Only for spreadsheet inputs |
 | `ocrmypdf` | any | OCR of scanned / image-only pages | Yes (`OCR_MODE=auto` degrades gracefully) |
@@ -154,6 +154,7 @@ When OCR was applied: `ocr: true`, `ocr_tool: ocrmypdf`, `ocr_lang: <lang>`.
 
 | Version | Changes |
 |---------|---------|
+| 1.0.11 | `check`: raise python3 minimum to >=3.10.0 |
 | 1.0.10 | `any-to-md` detects the real format by content (`detect-format.py`): handles wrong/missing extensions, skips unsupported content with an explanation; scripts record `source` and real `source_format`; `check` verifies the new script |
 | 1.0.9 | Add spreadsheet support (XLS/XLSX/XLSM): Step 4c, `xlsx-to-md.py` (openpyxl), `AGENT_ALL_TO_MD_XLSX_MAX_ROWS`; `check` verifies openpyxl |
 | 1.0.8 | Add optional OCR (`ocrmypdf`/`tesseract`): Step 4b, `--ocr` flag and `AGENT_ALL_TO_MD_OCR[_LANG]`; consolidation script records `ocr`, `ocr_tool`, `ocr_lang` in frontmatter and tolerates missing qpdf; `check` verifies OCR tools |
