@@ -1,7 +1,7 @@
 ---
 name: doc-doctor
 description: Audits documentation completeness and language for each plugin: verifies spec files, plugins/README.md listing, README.md skills tables, and English-only content against catalog ground truth. Reports findings and offers to generate or update missing content automatically. Also invoked explicitly as /p4cc-plugin:doc-doctor.
-version: 38
+version: 47
 argument-hint: "[plugin]"
 allowed-tools: [Bash, Read, Write, Edit, AskUserQuestion]
 ---
@@ -130,7 +130,7 @@ out({"status": "ok", "REPO_ROOT": str(repo), "MARKETPLACE": marketplace, "resolv
 PY
 ```
 
-Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache path (`CACHE_BASE/<plugin>/<version>/`) and `GLOBAL_CATALOG` **before writing anything**, then act on the result:
+Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache base (`CACHE_BASE`, read-only) and `GLOBAL_CATALOG` **before writing anything**, then act on the result:
 
 - **Exit 0, `confirm_needed: false`** → continue.
 - **`confirm_needed: true`** → print `notes` and ask with **AskUserQuestion** whether to continue with exactly these paths. Stop if the answer is no.
@@ -140,7 +140,7 @@ Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache path (`CACHE_BASE
 
 From here on, `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, `CACHE_BASE`, `GLOBAL_CATALOG`, `GLOBAL_CATALOG_WRITABLE` and `DOCS_LANGUAGE` (`docs_language`) are the values printed above.
 
-**Write boundaries.** This skill writes only inside `REPO_ROOT`, the single file `GLOBAL_CATALOG` (under `~/.p4cc/`) and `CACHE_BASE`. For `plugin4cc` these are exactly the paths it always used (`~/.p4cc/catalog.json`, `~/.claude/plugins/cache/plugin4cc`); for any other marketplace `GLOBAL_CATALOG` is `~/.p4cc/catalog-<marketplace>.json`. If `GLOBAL_CATALOG` exists and its `name` is not `MARKETPLACE`, `GLOBAL_CATALOG_WRITABLE` is `false` and it is never modified.
+**Write boundaries.** This skill writes only inside `REPO_ROOT` and the single file `GLOBAL_CATALOG` (under `~/.p4cc/`). It **never writes to the Claude Code cache**: `CACHE_BASE` is read-only, because the cache is managed by Claude Code (`/plugin`) and deleting or replacing a version it has registered as installed breaks the plugin. For `plugin4cc` these are exactly the paths it always used (`~/.p4cc/catalog.json`, `~/.claude/plugins/cache/plugin4cc`); for any other marketplace `GLOBAL_CATALOG` is `~/.p4cc/catalog-<marketplace>.json`. If `GLOBAL_CATALOG` exists and its `name` is not `MARKETPLACE`, `GLOBAL_CATALOG_WRITABLE` is `false` and it is never modified.
 
 Read `CATALOG` into memory.
 

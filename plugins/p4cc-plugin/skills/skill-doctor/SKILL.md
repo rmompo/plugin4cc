@@ -1,7 +1,7 @@
 ---
 name: skill-doctor
 description: Audits plugin skills for version mismatches, frontmatter issues, allowed-tools gaps, catalog inconsistencies, and structural defects. Emits a prioritized findings report and offers to fix auto-correctable defects. Also invoked explicitly as /p4cc-plugin:skill-doctor.
-version: 41
+version: 50
 argument-hint: "[plugin] [skill]"
 allowed-tools: [Bash, Read, Write, Edit, AskUserQuestion]
 ---
@@ -14,7 +14,7 @@ Audits one or more plugin skills for defects and inconsistencies. Produces a fin
 REPO_ROOT    = resolved in Step 1 (P4CC_REPO → git root → walk-up → bounded search)
 MARKETPLACE  = "name" of $REPO_ROOT/.claude-plugin/marketplace.json
 CATALOG      = $REPO_ROOT/specs/catalog.json
-CACHE_BASE   = ~/.claude/plugins/cache/$MARKETPLACE
+CACHE_BASE   = ~/.claude/plugins/cache/$MARKETPLACE   (read-only)
 GLOBAL_CATALOG = ~/.p4cc/catalog.json (plugin4cc) | ~/.p4cc/catalog-$MARKETPLACE.json
 ```
 
@@ -130,7 +130,7 @@ out({"status": "ok", "REPO_ROOT": str(repo), "MARKETPLACE": marketplace, "resolv
 PY
 ```
 
-Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache path (`CACHE_BASE/<plugin>/<version>/`) and `GLOBAL_CATALOG` **before writing anything**, then act on the result:
+Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache base (`CACHE_BASE`, read-only) and `GLOBAL_CATALOG` **before writing anything**, then act on the result:
 
 - **Exit 0, `confirm_needed: false`** → continue.
 - **`confirm_needed: true`** → print `notes` and ask with **AskUserQuestion** whether to continue with exactly these paths. Stop if the answer is no.
@@ -140,7 +140,7 @@ Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache path (`CACHE_BASE
 
 From here on, `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, `CACHE_BASE`, `GLOBAL_CATALOG`, `GLOBAL_CATALOG_WRITABLE` and `DOCS_LANGUAGE` (`docs_language`) are the values printed above.
 
-**Write boundaries.** This skill writes only inside `REPO_ROOT`, the single file `GLOBAL_CATALOG` (under `~/.p4cc/`) and `CACHE_BASE`. For `plugin4cc` these are exactly the paths it always used (`~/.p4cc/catalog.json`, `~/.claude/plugins/cache/plugin4cc`); for any other marketplace `GLOBAL_CATALOG` is `~/.p4cc/catalog-<marketplace>.json`. If `GLOBAL_CATALOG` exists and its `name` is not `MARKETPLACE`, `GLOBAL_CATALOG_WRITABLE` is `false` and it is never modified.
+**Write boundaries.** This skill writes only inside `REPO_ROOT` and the single file `GLOBAL_CATALOG` (under `~/.p4cc/`). It **never writes to the Claude Code cache**: `CACHE_BASE` is read-only, because the cache is managed by Claude Code (`/plugin`) and deleting or replacing a version it has registered as installed breaks the plugin. For `plugin4cc` these are exactly the paths it always used (`~/.p4cc/catalog.json`, `~/.claude/plugins/cache/plugin4cc`); for any other marketplace `GLOBAL_CATALOG` is `~/.p4cc/catalog-<marketplace>.json`. If `GLOBAL_CATALOG` exists and its `name` is not `MARKETPLACE`, `GLOBAL_CATALOG_WRITABLE` is `false` and it is never modified.
 
 Read `CATALOG` into memory. Read the list of installed plugins from `CACHE_BASE`.
 
@@ -340,12 +340,15 @@ Defect:    plugin.json version: X ≠ catalog version: Y
 Mitigate:  update plugin.json: "version": "X" → "Y"
 ```
 
-#### C3 — Cache out of sync with plugin.json  `CRITICAL · [auto]`
-Check `$CACHE_BASE/<plugin>/` — the highest versioned directory must equal the plugin.json version.
-If missing or lower → defect.
+#### C3 — Installed version differs from plugin.json  `MINOR · [manual]`
+**Advisory and read-only.** The Claude Code cache is managed by Claude Code (`/plugin`); this skill never writes to it.
+Read the installed version of the plugin from `~/.claude/plugins/installed_plugins.json` (entry `<plugin>@$MARKETPLACE`, field `version`); if there is no entry, fall back to the highest versioned directory under `$CACHE_BASE/<plugin>/`. Compare it with `plugin.json`.
+- Installed is lower than `plugin.json` → an update is pending (normal right after a change).
+- Installed is higher than `plugin.json` → the installed copy is newer than this repo.
+- Not installed → nothing to report.
 ```
-Defect:    cache at vX, plugin.json at vY — cache is stale
-Mitigate:  re-sync cache (shutil.copytree)
+Defect:    installed vX, plugin.json at vY
+Mitigate:  git push, then in Claude Code: /plugin → update the marketplace and <plugin>, then /reload-plugins
 ```
 
 #### C4 — Missing required frontmatter fields  `CRITICAL · [manual]`
@@ -489,11 +492,6 @@ pj["version"] = catalog_version
 open(pj_path, 'w').write(json.dumps(pj, indent=2, ensure_ascii=False) + '\n')
 ```
 
-**C3 — Cache sync:**
-```python
-# Remove old cache under $CACHE_BASE/<plugin>/, copytree from plugin_dir to $CACHE_BASE/<plugin>/<new_version>
-```
-
 **C7 — Description suffix:**
 ```bash
 # Append suffix to description line in SKILL.md frontmatter
@@ -512,8 +510,6 @@ For `[manual]` findings that were selected → print:
     Action:   <mitigation plan>
 ```
 
-After all fixes applied, re-sync cache for any plugin that was modified.
-
 ---
 
 ## Step 7 — Summary
@@ -531,11 +527,10 @@ After all fixes applied, re-sync cache for any plugin that was modified.
     plugins/<plugin>/.claude-plugin/plugin.json
     specs/catalog.json
 
-  Cache re-synced: <plugin> v<version>
 ══════════════════════════════════════════
 
 Next steps:
   1. Review manual findings above
   2. git add + commit + push
-  3. claude plugins update <plugin>
+  3. In Claude Code: `/plugin` → update the marketplace and `<plugin>` (the cache is managed by Claude Code, never by this skill), then `/reload-plugins`
 ```

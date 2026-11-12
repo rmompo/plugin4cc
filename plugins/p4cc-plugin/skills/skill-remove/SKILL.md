@@ -1,7 +1,7 @@
 ---
 name: skill-remove
-description: Removes a skill from a plugin. Deletes the SKILL.md, updates catalog.json (Z does not decrease), and syncs the CLI cache. Destructive — requires explicit confirmation. Also invoked explicitly as /p4cc-plugin:skill-remove with the plugin and skill name.
-version: 42
+description: Removes a skill from a plugin. Deletes the SKILL.md, and updates catalog.json (Z does not decrease). Never touches the Claude Code cache. Destructive — requires explicit confirmation. Also invoked explicitly as /p4cc-plugin:skill-remove with the plugin and skill name.
+version: 51
 argument-hint: "<plugin> <skill>"
 allowed-tools: [Bash, Read, Edit, Write, AskUserQuestion]
 ---
@@ -124,7 +124,7 @@ out({"status": "ok", "REPO_ROOT": str(repo), "MARKETPLACE": marketplace, "resolv
 PY
 ```
 
-Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache path (`CACHE_BASE/<plugin>/<version>/`) and `GLOBAL_CATALOG` **before writing anything**, then act on the result:
+Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache base (`CACHE_BASE`, read-only) and `GLOBAL_CATALOG` **before writing anything**, then act on the result:
 
 - **Exit 0, `confirm_needed: false`** → continue.
 - **`confirm_needed: true`** → print `notes` and ask with **AskUserQuestion** whether to continue with exactly these paths. Stop if the answer is no.
@@ -134,7 +134,7 @@ Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache path (`CACHE_BASE
 
 From here on, `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, `CACHE_BASE`, `GLOBAL_CATALOG`, `GLOBAL_CATALOG_WRITABLE` and `DOCS_LANGUAGE` (`docs_language`) are the values printed above.
 
-**Write boundaries.** This skill writes only inside `REPO_ROOT`, the single file `GLOBAL_CATALOG` (under `~/.p4cc/`) and `CACHE_BASE`. For `plugin4cc` these are exactly the paths it always used (`~/.p4cc/catalog.json`, `~/.claude/plugins/cache/plugin4cc`); for any other marketplace `GLOBAL_CATALOG` is `~/.p4cc/catalog-<marketplace>.json`. If `GLOBAL_CATALOG` exists and its `name` is not `MARKETPLACE`, `GLOBAL_CATALOG_WRITABLE` is `false` and it is never modified.
+**Write boundaries.** This skill writes only inside `REPO_ROOT` and the single file `GLOBAL_CATALOG` (under `~/.p4cc/`). It **never writes to the Claude Code cache**: `CACHE_BASE` is read-only, because the cache is managed by Claude Code (`/plugin`) and deleting or replacing a version it has registered as installed breaks the plugin. For `plugin4cc` these are exactly the paths it always used (`~/.p4cc/catalog.json`, `~/.claude/plugins/cache/plugin4cc`); for any other marketplace `GLOBAL_CATALOG` is `~/.p4cc/catalog-<marketplace>.json`. If `GLOBAL_CATALOG` exists and its `name` is not `MARKETPLACE`, `GLOBAL_CATALOG_WRITABLE` is `false` and it is never modified.
 
 ---
 
@@ -224,28 +224,6 @@ Find the row for `<plugin>` in the Available plugins table and remove `<skill>` 
 
 ---
 
-## Step 5 — Sync cache (no version bump)
-
-```python
-import shutil, os, json
-
-plugin_dir = f"{REPO_ROOT}/plugins/{plugin_name}"
-version = json.load(open(f"{plugin_dir}/.claude-plugin/plugin.json"))["version"]
-cache_base = f"{CACHE_BASE}/{plugin_name}"
-os.makedirs(cache_base, exist_ok=True)
-for old in os.listdir(cache_base): shutil.rmtree(f"{cache_base}/{old}")
-dst = f"{cache_base}/{version}"
-shutil.copytree(plugin_dir, dst, ignore=shutil.ignore_patterns('.git'))
-for item in os.listdir(plugin_dir):
-    if item.startswith('.') and item != '.git':
-        s, d = f"{plugin_dir}/{item}", f"{dst}/{item}"
-        if os.path.isdir(s):
-            if os.path.exists(d): shutil.rmtree(d)
-            shutil.copytree(s, d)
-```
-
----
-
 ## Summary output
 
 ```
@@ -263,9 +241,7 @@ Marketplaces updated:
   specs/catalog.json  →  $GLOBAL_CATALOG (synced)
   plugins/README.md  (Skills column)
 
-Cache synced: $CACHE_BASE/<plugin>/<version>/
-
 Next steps:
   1. git add + commit + push
-  2. claude plugins update <plugin>
+  2. In Claude Code: `/plugin` → update the marketplace and `<plugin>` (the cache is managed by Claude Code, never by this skill), then `/reload-plugins`
 ```

@@ -1,14 +1,14 @@
 ---
 name: skill-add
-description: Adds a new skill to an existing plugin. Bumps Z versioning in catalog.json and plugin.json, creates the SKILL.md, and syncs the CLI cache. Also invoked explicitly as /p4cc-plugin:skill-add with the plugin and skill name.
-version: 40
+description: Adds a new skill to an existing plugin. Bumps Z versioning in catalog.json and plugin.json and creates the SKILL.md. Never touches the Claude Code cache. Also invoked explicitly as /p4cc-plugin:skill-add with the plugin and skill name.
+version: 49
 argument-hint: "<plugin> <skill>"
 allowed-tools: [Bash, Read, Edit, Write, AskUserQuestion]
 ---
 
 # Skill Adder
 
-Adds a new skill to an existing plugin, bumps Z versioning, and syncs all catalogs and the CLI cache.
+Adds a new skill to an existing plugin, bumps Z versioning and syncs the catalogs. It does not touch the Claude Code cache.
 
 ---
 
@@ -131,7 +131,7 @@ out({"status": "ok", "REPO_ROOT": str(repo), "MARKETPLACE": marketplace, "resolv
 PY
 ```
 
-Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache path (`CACHE_BASE/<plugin>/<version>/`) and `GLOBAL_CATALOG` **before writing anything**, then act on the result:
+Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache base (`CACHE_BASE`, read-only) and `GLOBAL_CATALOG` **before writing anything**, then act on the result:
 
 - **Exit 0, `confirm_needed: false`** → continue.
 - **`confirm_needed: true`** → print `notes` and ask with **AskUserQuestion** whether to continue with exactly these paths. Stop if the answer is no.
@@ -141,7 +141,7 @@ Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache path (`CACHE_BASE
 
 From here on, `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, `CACHE_BASE`, `GLOBAL_CATALOG`, `GLOBAL_CATALOG_WRITABLE` and `DOCS_LANGUAGE` (`docs_language`) are the values printed above.
 
-**Write boundaries.** This skill writes only inside `REPO_ROOT`, the single file `GLOBAL_CATALOG` (under `~/.p4cc/`) and `CACHE_BASE`. For `plugin4cc` these are exactly the paths it always used (`~/.p4cc/catalog.json`, `~/.claude/plugins/cache/plugin4cc`); for any other marketplace `GLOBAL_CATALOG` is `~/.p4cc/catalog-<marketplace>.json`. If `GLOBAL_CATALOG` exists and its `name` is not `MARKETPLACE`, `GLOBAL_CATALOG_WRITABLE` is `false` and it is never modified.
+**Write boundaries.** This skill writes only inside `REPO_ROOT` and the single file `GLOBAL_CATALOG` (under `~/.p4cc/`). It **never writes to the Claude Code cache**: `CACHE_BASE` is read-only, because the cache is managed by Claude Code (`/plugin`) and deleting or replacing a version it has registered as installed breaks the plugin. For `plugin4cc` these are exactly the paths it always used (`~/.p4cc/catalog.json`, `~/.claude/plugins/cache/plugin4cc`); for any other marketplace `GLOBAL_CATALOG` is `~/.p4cc/catalog-<marketplace>.json`. If `GLOBAL_CATALOG` exists and its `name` is not `MARKETPLACE`, `GLOBAL_CATALOG_WRITABLE` is `false` and it is never modified.
 
 ---
 
@@ -290,27 +290,6 @@ Find the row for `<plugin>` in the Available plugins table and update the **Skil
 
 ---
 
-## Step 6 — Sync cache
-
-```python
-import shutil, os, json
-
-plugin_dir = f"{REPO_ROOT}/plugins/{plugin_name}"
-cache_base = f"{CACHE_BASE}/{plugin_name}"
-os.makedirs(cache_base, exist_ok=True)
-for old in os.listdir(cache_base): shutil.rmtree(f"{cache_base}/{old}")
-dst = f"{cache_base}/{new_version}"
-shutil.copytree(plugin_dir, dst, ignore=shutil.ignore_patterns('.git'))
-for item in os.listdir(plugin_dir):
-    if item.startswith('.') and item != '.git':
-        s, d = f"{plugin_dir}/{item}", f"{dst}/{item}"
-        if os.path.isdir(s):
-            if os.path.exists(d): shutil.rmtree(d)
-            shutil.copytree(s, d)
-```
-
----
-
 ## Summary output
 
 ```
@@ -326,10 +305,8 @@ Marketplaces updated:
   specs/catalog.json  →  $GLOBAL_CATALOG (synced)
   plugins/README.md  (Skills column)
 
-Cache synced: $CACHE_BASE/<plugin>/<new_version>/
-
 Next steps:
   1. Fill in skill logic in skills/<skill>/SKILL.md
   2. git add + commit + push
-  3. claude plugins update <plugin>
+  3. In Claude Code: `/plugin` → update the marketplace and `<plugin>` (the cache is managed by Claude Code, never by this skill), then `/reload-plugins`
 ```

@@ -624,10 +624,42 @@
       "description": "Marketplace lifecycle tooling: create and manage plugins and skills with automatic version tracking.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.1.45",
+      "version": "1.1.53",
       "spec": "specs/p4cc-plugin.md",
       "path": "plugins/p4cc-plugin",
       "changelog": [
+        {
+          "version": "1.1.53",
+          "changes": "update: stop writing to the Claude Code cache; the cache is managed by /plugin"
+        },
+        {
+          "version": "1.1.52",
+          "changes": "skill-update: stop writing to the Claude Code cache; the cache is managed by /plugin"
+        },
+        {
+          "version": "1.1.51",
+          "changes": "skill-remove: stop writing to the Claude Code cache; the cache is managed by /plugin"
+        },
+        {
+          "version": "1.1.50",
+          "changes": "skill-doctor: stop writing to the Claude Code cache; the cache is managed by /plugin"
+        },
+        {
+          "version": "1.1.49",
+          "changes": "skill-add: stop writing to the Claude Code cache; the cache is managed by /plugin"
+        },
+        {
+          "version": "1.1.48",
+          "changes": "remove: stop writing to the Claude Code cache; the cache is managed by /plugin"
+        },
+        {
+          "version": "1.1.47",
+          "changes": "doc-doctor: stop writing to the Claude Code cache; the cache is managed by /plugin"
+        },
+        {
+          "version": "1.1.46",
+          "changes": "create: stop writing to the Claude Code cache; the cache is managed by /plugin"
+        },
         {
           "version": "1.1.45",
           "changes": "create: example tool dependency uses python3 >=3.10.0"
@@ -768,8 +800,12 @@
       "skills": [
         {
           "name": "create",
-          "version": 45,
+          "version": 46,
           "changelog": [
+            {
+              "version": 46,
+              "changes": "stop writing to the Claude Code cache; the cache is managed by /plugin"
+            },
             {
               "version": 45,
               "changes": "example tool dependency uses python3 >=3.10.0"
@@ -806,8 +842,12 @@
         },
         {
           "name": "update",
-          "version": 44,
+          "version": 53,
           "changelog": [
+            {
+              "version": 53,
+              "changes": "stop writing to the Claude Code cache; the cache is managed by /plugin"
+            },
             {
               "version": 44,
               "changes": "work with any marketplace: resolve repo, cache and global catalog dynamically"
@@ -824,8 +864,12 @@
         },
         {
           "name": "remove",
-          "version": 39,
+          "version": 48,
           "changelog": [
+            {
+              "version": 48,
+              "changes": "stop writing to the Claude Code cache; the cache is managed by /plugin"
+            },
             {
               "version": 39,
               "changes": "work with any marketplace: resolve repo, cache and global catalog dynamically"
@@ -838,8 +882,12 @@
         },
         {
           "name": "skill-add",
-          "version": 40,
+          "version": 49,
           "changelog": [
+            {
+              "version": 49,
+              "changes": "stop writing to the Claude Code cache; the cache is managed by /plugin"
+            },
             {
               "version": 40,
               "changes": "work with any marketplace: resolve repo, cache and global catalog dynamically"
@@ -856,8 +904,12 @@
         },
         {
           "name": "skill-update",
-          "version": 43,
+          "version": 52,
           "changelog": [
+            {
+              "version": 52,
+              "changes": "stop writing to the Claude Code cache; the cache is managed by /plugin"
+            },
             {
               "version": 43,
               "changes": "work with any marketplace; insert a missing version in the SKILL.md frontmatter"
@@ -870,8 +922,12 @@
         },
         {
           "name": "skill-remove",
-          "version": 42,
+          "version": 51,
           "changelog": [
+            {
+              "version": 51,
+              "changes": "stop writing to the Claude Code cache; the cache is managed by /plugin"
+            },
             {
               "version": 42,
               "changes": "work with any marketplace: resolve repo, cache and global catalog dynamically"
@@ -888,8 +944,12 @@
         },
         {
           "name": "skill-doctor",
-          "version": 41,
+          "version": 50,
           "changelog": [
+            {
+              "version": 50,
+              "changes": "stop writing to the Claude Code cache; the cache is managed by /plugin"
+            },
             {
               "version": 41,
               "changes": "work with any marketplace; offer a catalog bootstrap when it is missing; C1 handles a missing version"
@@ -926,8 +986,12 @@
         },
         {
           "name": "doc-doctor",
-          "version": 38,
+          "version": 47,
           "changelog": [
+            {
+              "version": 47,
+              "changes": "stop writing to the Claude Code cache; the cache is managed by /plugin"
+            },
             {
               "version": 38,
               "changes": "work with any marketplace; D8 honors docs_language from the catalog"

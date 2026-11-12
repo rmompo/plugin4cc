@@ -1,14 +1,14 @@
 ---
 name: create
 description: Scaffolds a new plugin with all required files and registers it in every catalog. Also invoked explicitly as /p4cc-plugin:create with the plugin name and optional skill names.
-version: 45
+version: 46
 argument-hint: "<plugin> [skill1 skill2 ...]"
 allowed-tools: [Bash, Read, Edit, Write, AskUserQuestion]
 ---
 
 # Plugin Creator
 
-Scaffolds a complete new plugin and registers it in all catalogs and the Claude Code cache.
+Scaffolds a complete new plugin and registers it in the catalogs. It does not touch the Claude Code cache.
 
 ```
 specs/catalog.json                              ← PRIMARY — written first
@@ -17,7 +17,6 @@ plugins/<plugin>/.claude-plugin/plugin.json     ← minimal plugin metadata
 .claude-plugin/marketplace.json                 ← Claude Code marketplace index
 plugins/README.md                               ← human-readable plugin index
 specs/<plugin>.md                               ← plugin spec file
-$CACHE_BASE/                     ← Claude Code cache
 ```
 
 ---
@@ -132,7 +131,7 @@ out({"status": "ok", "REPO_ROOT": str(repo), "MARKETPLACE": marketplace, "resolv
 PY
 ```
 
-Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache path (`CACHE_BASE/<plugin>/<version>/`) and `GLOBAL_CATALOG` **before writing anything**, then act on the result:
+Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache base (`CACHE_BASE`, read-only) and `GLOBAL_CATALOG` **before writing anything**, then act on the result:
 
 - **Exit 0, `confirm_needed: false`** → continue.
 - **`confirm_needed: true`** → print `notes` and ask with **AskUserQuestion** whether to continue with exactly these paths. Stop if the answer is no.
@@ -142,7 +141,7 @@ Show the user `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, the cache path (`CACHE_BASE
 
 From here on, `REPO_ROOT`, `MARKETPLACE`, `CATALOG`, `CACHE_BASE`, `GLOBAL_CATALOG`, `GLOBAL_CATALOG_WRITABLE` and `DOCS_LANGUAGE` (`docs_language`) are the values printed above.
 
-**Write boundaries.** This skill writes only inside `REPO_ROOT`, the single file `GLOBAL_CATALOG` (under `~/.p4cc/`) and `CACHE_BASE`. For `plugin4cc` these are exactly the paths it always used (`~/.p4cc/catalog.json`, `~/.claude/plugins/cache/plugin4cc`); for any other marketplace `GLOBAL_CATALOG` is `~/.p4cc/catalog-<marketplace>.json`. If `GLOBAL_CATALOG` exists and its `name` is not `MARKETPLACE`, `GLOBAL_CATALOG_WRITABLE` is `false` and it is never modified.
+**Write boundaries.** This skill writes only inside `REPO_ROOT` and the single file `GLOBAL_CATALOG` (under `~/.p4cc/`). It **never writes to the Claude Code cache**: `CACHE_BASE` is read-only, because the cache is managed by Claude Code (`/plugin`) and deleting or replacing a version it has registered as installed breaks the plugin. For `plugin4cc` these are exactly the paths it always used (`~/.p4cc/catalog.json`, `~/.claude/plugins/cache/plugin4cc`); for any other marketplace `GLOBAL_CATALOG` is `~/.p4cc/catalog-<marketplace>.json`. If `GLOBAL_CATALOG` exists and its `name` is not `MARKETPLACE`, `GLOBAL_CATALOG_WRITABLE` is `false` and it is never modified.
 
 ---
 
@@ -403,28 +402,6 @@ Insert a row for the new plugin **in alphabetical order** in the plugins table o
 
 ---
 
-## Step 8 — Sync cache
-
-```python
-import shutil, os, json
-
-plugin_dir = f"{REPO_ROOT}/plugins/{plugin_name}"
-version = json.load(open(f"{plugin_dir}/.claude-plugin/plugin.json"))["version"]
-cache_base = f"{CACHE_BASE}/{plugin_name}"
-os.makedirs(cache_base, exist_ok=True)
-for old in os.listdir(cache_base): shutil.rmtree(f"{cache_base}/{old}")
-dst = f"{cache_base}/{version}"
-shutil.copytree(plugin_dir, dst, ignore=shutil.ignore_patterns('.git'))
-for item in os.listdir(plugin_dir):
-    if item.startswith('.') and item != '.git':
-        s, d = f"{plugin_dir}/{item}", f"{dst}/{item}"
-        if os.path.isdir(s):
-            if os.path.exists(d): shutil.rmtree(d)
-            shutil.copytree(s, d)
-```
-
----
-
 ## Summary output
 
 ```
@@ -442,10 +419,8 @@ Marketplaces updated:
   plugins/README.md
   README.md  (plugins table — alphabetical)
 
-Cache synced: $CACHE_BASE/<plugin>/1.0.<Z>/
-
 Next steps:
   1. Fill in skill logic in skills/<skill>/SKILL.md
   2. git add + commit + push
-  3. claude plugins install <plugin>
+  3. In Claude Code: `/plugin` → update the marketplace and install `<plugin>` (the cache is managed by Claude Code, never by this skill), then `/reload-plugins`
 ```
