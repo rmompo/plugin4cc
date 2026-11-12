@@ -1,7 +1,7 @@
 ---
 name: check
 description: Read-only verification of the p4cc-converter infrastructure — folders, files, external tools and plugin resources. Reports status and tells how to install anything missing. Also invoked explicitly as /p4cc-converter:check.
-version: 8
+version: 9
 allowed-tools: [Bash]
 ---
 
@@ -48,7 +48,7 @@ Files shipped with the plugin must be present in the plugin cache:
 ```bash
 PLUGIN_CACHE=$(ls -d ~/.claude/plugins/cache/plugin4cc/p4cc-converter/*/ 2>/dev/null | sort -V | tail -1)
 [ -z "$PLUGIN_CACHE" ] && echo "❌ plugin cache not found"
-for f in resources/scripts/all-to-md-consolidate.py; do
+for f in resources/scripts/all-to-md-consolidate.py resources/scripts/xlsx-to-md.py; do
   [ -f "$PLUGIN_CACHE$f" ] && echo "✅ $f" || echo "❌ $f"
 done
 ```
@@ -84,6 +84,14 @@ which python3 && python3 --version 2>&1
 which libreoffice && libreoffice --version | head -1 2>&1
 ```
 
+### Python packages (spreadsheets)
+
+`openpyxl` reads XLSX/XLSM for `any-to-md` Step 4c (`.xls` is first converted with `libreoffice`). It is only needed when you convert spreadsheets, so a missing package is ⚠️ (not ❌) and never fails the check.
+
+```bash
+python3 -c "import openpyxl; print(openpyxl.__version__)" 2>/dev/null
+```
+
 ### OCR tools (optional)
 
 Used by `any-to-md` Step 4b to read scanned or image-only pages. Not in the catalog `dependencies` — a missing OCR tool is reported as ⚠️ and never fails the check.
@@ -113,7 +121,7 @@ Language check: the default `OCR_LANG` is `spa+eng` (override with `AGENT_ALL_TO
 ══════════════════════════════════════════
 ```
 
-One table per area (Folders, Plugin resources, Tools, OCR tools (optional)):
+One table per area (Folders, Plugin resources, Tools, Python packages, OCR tools (optional)):
 
 | Area | Item | Required | Found | Status |
 |------|------|----------|-------|--------|
@@ -131,6 +139,18 @@ One table per area (Folders, Plugin resources, Tools, OCR tools (optional)):
 For each ❌ / ⚠️ item print the matching fix. **Never run these commands yourself** — only show them.
 
 **Folders / catalog:** run `/p4cc-converter:install`.
+
+### `openpyxl` (spreadsheets only)
+
+**Debian / Ubuntu / WSL:**
+```bash
+sudo apt install python3-openpyxl
+```
+
+**Any OS (pip):**
+```bash
+pip install openpyxl
+```
 
 ### OCR (optional) — `ocrmypdf`, `tesseract`, `pdftotext`
 
@@ -217,10 +237,10 @@ All required items ✅:
 ✅ p4cc-converter infrastructure is complete. No action required.
 ```
 
-Optional OCR tools missing (everything else ✅):
+Optional components missing — OCR tools, openpyxl (everything else ✅):
 ```
 ✅ p4cc-converter infrastructure is complete.
-⚠️  OCR tools not found — scanned PDFs will rely on vision only. See the OCR install instructions above.
+⚠️  Optional components missing: OCR tools (scanned PDFs rely on vision only) and/or openpyxl (spreadsheets cannot be converted). See the install instructions above.
 ```
 
 Any required item ❌:

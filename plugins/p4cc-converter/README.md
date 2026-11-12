@@ -1,8 +1,10 @@
 # p4cc-converter
 
-Document-to-Markdown converter plugin for Claude Code. Converts PDF, DOC, DOCX, PPT, and PPTX files to structured, LLM-optimized Markdown using a local pipeline with optional OCR for scanned documents.
+Document-to-Markdown converter plugin for Claude Code. Converts PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and XLSM files to structured, LLM-optimized Markdown using a local pipeline with optional OCR for scanned documents.
 
 ## Pipeline
+
+Text documents:
 
 ```
 Input (PDF/DOC/DOCX/PPT/PPTX)
@@ -20,13 +22,24 @@ Input (PDF/DOC/DOCX/PPT/PPTX)
     Final .md (LLM-optimized)
 ```
 
+Spreadsheets (XLS / XLSX / XLSM) skip the PDF route:
+
+```
+.xls  → LibreOffice → .xlsx (temporary)
+.xlsx / .xlsm
+    ↓ openpyxl (xlsx-to-md.py): one "## sheet" section per visible sheet, one table each
+    .md (with frontmatter)
+    ↓ light LLM review (data is never altered)
+    Final .md
+```
+
 ## Skills
 
 | Skill | Invocation | What it does |
 |-------|-----------|--------------|
 | `install` | `/p4cc-converter:install` | Installs the catalog copy, then runs `check`. |
-| `check` | `/p4cc-converter:check` | Read-only check of qpdf, python3, libreoffice, optional OCR tools and the consolidation script. Reports how to fix anything missing. |
-| `any-to-md` | `/p4cc-converter:any-to-md [path]` | Converts documents to structured Markdown (OCR for scanned pages) |
+| `check` | `/p4cc-converter:check` | Read-only check of qpdf, python3, libreoffice, openpyxl, optional OCR tools and the conversion scripts. Reports how to fix anything missing. |
+| `any-to-md` | `/p4cc-converter:any-to-md [path]` | Converts documents to structured Markdown (OCR for scanned pages, direct table extraction for spreadsheets) |
 
 ## Requirements
 
@@ -34,7 +47,8 @@ Input (PDF/DOC/DOCX/PPT/PPTX)
 |------|---------|---------|
 | `qpdf` | ≥11.0.0 | Split PDF into chunks |
 | `python3` | ≥3.8.0 | Consolidation script |
-| `libreoffice` | ≥7.0.0 | Convert DOC/DOCX/PPT/PPTX to PDF |
+| `libreoffice` | ≥7.0.0 | Convert DOC/DOCX/PPT/PPTX to PDF and XLS to XLSX |
+| `openpyxl` *(only for spreadsheets)* | any | Read XLSX/XLSM (`sudo apt install python3-openpyxl`) |
 | `ocrmypdf` + `tesseract` *(optional)* | any | OCR for scanned or image-only pages |
 | `pdftotext` *(optional)* | any | Detect pages without a text layer (`auto` mode) |
 
@@ -60,10 +74,15 @@ Input (PDF/DOC/DOCX/PPT/PPTX)
 | `AGENT_ALL_TO_MD_REPROCESS` | `false` | Set to `true` to reprocess already-converted files |
 | `AGENT_ALL_TO_MD_OCR` | `auto` | `auto` = OCR only documents with pages lacking a text layer, `always` = force OCR, `never` = disable (also `--ocr <mode>`) |
 | `AGENT_ALL_TO_MD_OCR_LANG` | `spa+eng` | Tesseract language(s), `+`-separated |
+| `AGENT_ALL_TO_MD_XLSX_MAX_ROWS` | `1000` | Max data rows per spreadsheet sheet (`0` = no limit); extra rows are omitted with a note |
 
 ## OCR
 
 Scanned or image-only pages are OCR'd with `ocrmypdf` before splitting. The result is saved as `<name>.ocr.pdf` (kept for reuse) and the model cross-checks the OCR text against the page image, so layout, tables and diagrams still come from vision. If the OCR tools are missing, `auto` mode continues without OCR and warns; run `/p4cc-converter:check` for install instructions.
+
+## Spreadsheets
+
+Each visible sheet becomes a `## <sheet>` section with a Markdown table (first row = header). Hidden sheets are skipped and listed in the frontmatter; merged cells are written once; dates are ISO; formulas are written as their calculated values (workbooks never calculated by Excel are recalculated through LibreOffice). Charts, images and pivot tables are not extracted.
 
 ## Output
 

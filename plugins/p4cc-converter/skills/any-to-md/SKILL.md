@@ -1,24 +1,25 @@
 ---
 name: any-to-md
-description: Converts PDF, DOC, DOCX, PPT, and PPTX documents to structured Markdown using a 9-step pipeline (inventory → LibreOffice → optional OCR → qpdf split → LLM extraction → Python consolidation → LLM review). Scanned or image-only pages are OCR'd automatically. Also invoked explicitly as /p4cc-converter:any-to-md.
-version: 8
+description: Converts PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and XLSM documents to structured Markdown. Text documents go through a 9-step pipeline (inventory → LibreOffice → optional OCR → qpdf split → LLM extraction → Python consolidation → LLM review, scanned pages OCR'd automatically); spreadsheets are read directly with openpyxl, one table per sheet. Also invoked explicitly as /p4cc-converter:any-to-md.
+version: 9
 argument-hint: "[path/to/file-or-folder-or-glob] [--ocr auto|always|never]"
 allowed-tools: [Bash, Read, Write, AskUserQuestion]
 ---
 
 # Any to Markdown
 
-Converts documents (PDF, DOC, DOCX, PPT, PPTX) to structured, LLM-optimized Markdown using a 9-step pipeline covering 7 conceptual phases: inventory → to-pdf → OCR (optional) → split → extract → consolidate → review.
+Converts documents (PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, XLSM) to structured, LLM-optimized Markdown. Text documents use a 9-step pipeline covering 7 conceptual phases: inventory → to-pdf → OCR (optional) → split → extract → consolidate → review. **Spreadsheets (XLS/XLSX/XLSM) skip the PDF route** — Step 4c reads them directly with `openpyxl` (one table per sheet) and they continue at Step 8.
 
 ```
 CONSOLIDATE_SCRIPT = <plugin-cache>/resources/scripts/all-to-md-consolidate.py
+XLSX_SCRIPT        = <plugin-cache>/resources/scripts/xlsx-to-md.py
 ```
 
 Where `<plugin-cache>` = `~/.claude/plugins/cache/plugin4cc/p4cc-converter/<version>/`
 
 **Prerequisites:** run `/p4cc-converter:install` first to verify tool availability.
 
-**Processing model:** for each document in the inventory, run Steps 4 through 9 in full before moving to the next. Steps 4 and 5 reference "each file" within that per-document loop — not a batch over the whole inventory.
+**Processing model:** for each document in the inventory, run its route in full before moving to the next — text documents: Steps 4 through 9; spreadsheets: Steps 4c, 8 and 9. Steps 4 and 5 reference "each file" within that per-document loop — not a batch over the whole inventory.
 
 **Key variables** (established in Step 1, used throughout):
 
@@ -37,6 +38,7 @@ Where `<plugin-cache>` = `~/.claude/plugins/cache/plugin4cc/p4cc-converter/<vers
 ```bash
 PLUGIN_CACHE=$(ls -d ~/.claude/plugins/cache/plugin4cc/p4cc-converter/*/ 2>/dev/null | sort -V | tail -1)
 CONSOLIDATE_SCRIPT="$PLUGIN_CACHE/resources/scripts/all-to-md-consolidate.py"
+XLSX_SCRIPT="$PLUGIN_CACHE/resources/scripts/xlsx-to-md.py"
 ```
 
 Use **AskUserQuestion** to collect the three conversion parameters (or resolve from environment / skill argument):
@@ -55,7 +57,7 @@ You can specify:
   - A single file: /home/user/docs/manual.docx
   - A glob:        /home/user/docs/reports/*.pdf
 
-Supported formats: .pdf  .doc  .docx  .ppt  .pptx
+Supported formats: .pdf  .doc  .docx  .ppt  .pptx  .xls  .xlsx  .xlsm
 ```
 
 Expand `~` to the actual home directory before any file operation.
@@ -63,7 +65,7 @@ Expand `~` to the actual home directory before any file operation.
 ### 1.2 — Selection within the input path
 
 If the input path is a **folder**, ask the user how to select files within it:
-- **All supported files** — process every `.pdf`, `.doc`, `.docx`, `.ppt`, `.pptx` found (recursive if needed)
+- **All supported files** — process every `.pdf`, `.doc`, `.docx`, `.ppt`, `.pptx`, `.xls`, `.xlsx`, `.xlsm` found (recursive if needed)
 - **Glob pattern** — user provides a pattern relative to the input path (e.g. `reports_2026_*.pdf`)
 - **Explicit file(s)** — user lists specific filenames
 
@@ -101,6 +103,10 @@ Resolve `OCR_MODE` in order of precedence:
 
 Resolve `OCR_LANG`: environment variable `AGENT_ALL_TO_MD_OCR_LANG`, otherwise `spa+eng`.
 
+### 1.6 — Spreadsheet row limit
+
+Only used for spreadsheets. `XLSX_MAX_ROWS`: environment variable `AGENT_ALL_TO_MD_XLSX_MAX_ROWS`, otherwise `1000` data rows per sheet (`0` = no limit). Larger sheets are truncated with a note stating the total, because huge tables are rarely useful as LLM context. Never ask interactively.
+
 ---
 
 ## Step 2 — Verify tools
@@ -113,8 +119,16 @@ which python3 && python3 --version 2>&1 | head -1
 which libreoffice && libreoffice --version 2>&1 | head -1
 ```
 
-- `libreoffice` is **mandatory** only if the inventory will contain DOC/DOCX/PPT/PPTX files.
+- `libreoffice` is **mandatory** only if the inventory will contain DOC/DOCX/PPT/PPTX/XLS files.
 - If any required tool is missing → stop and direct the user to run `/p4cc-converter:check`.
+
+If the inventory will contain XLS/XLSX/XLSM files, also verify the Python package `openpyxl`:
+
+```bash
+python3 -c "import openpyxl; print(openpyxl.__version__)"
+```
+
+If missing → **stop** and show: `sudo apt install python3-openpyxl` (or `pip install openpyxl`) and direct the user to `/p4cc-converter:check`.
 
 If `OCR_MODE` ≠ `never`, also check the **optional** OCR tools:
 
@@ -134,7 +148,7 @@ which pdftotext && pdftotext -v 2>&1 | head -1      # needed only for auto detec
 
 ## Step 3 — Build inventory
 
-Resolve the glob pattern and collect files with extensions: `.pdf`, `.doc`, `.docx`, `.ppt`, `.pptx`.
+Resolve the glob pattern and collect files with extensions: `.pdf`, `.doc`, `.docx`, `.ppt`, `.pptx`, `.xls`, `.xlsx`, `.xlsm`. Ignore Office lock/temp files (`~$*`).
 
 For each file, `SOURCE_FOLDER` = absolute path to the folder containing that file.
 
@@ -142,6 +156,7 @@ For each file, `SOURCE_FOLDER` = absolute path to the folder containing that fil
 |-----------|-----------------|
 | `.pdf` | Direct → Step 4b (OCR, if needed) → Step 5 (split) |
 | `.doc`, `.docx`, `.ppt`, `.pptx` | Step 4 (to PDF) → Step 4b (OCR, if needed) → Step 5 (split) |
+| `.xls`, `.xlsx`, `.xlsm` | Step 4c (openpyxl, direct — no PDF, no OCR, no split) → Step 8 (review) |
 
 - Compute the target `.md` path:
   - If `OUTPUT_PATH` is set → `{OUTPUT_PATH}/{name}.md`
@@ -181,6 +196,7 @@ Files to process:
   1. input/docs/manual.docx       [docx → pdf → md]
   2. input/docs/guide.pdf         [pdf → md]
   3. input/docs/slides.pptx       [pptx → pdf → md]
+  4. input/docs/budget.xlsx       [xlsx → md]
 
 Proceed with conversion? [y/N]
 ```
@@ -278,6 +294,54 @@ If `ocrmypdf` fails (encrypted or corrupt PDF, etc.) → in `auto` mode warn and
   manual.pdf   → no OCR needed   (text layer present)
 ══════════════════════════════════════════
 ```
+
+---
+
+## Step 4c — Convert spreadsheets (openpyxl)
+
+Process only XLS/XLSX/XLSM files from the inventory. These **skip Steps 4, 4b, 5, 6 and 7**: tables are read directly from the workbook (a PDF would cut them across pages).
+
+### 4c.1 — Legacy `.xls` → `.xlsx`
+
+`openpyxl` cannot read `.xls`. Convert it with LibreOffice into a **temporary** folder (never next to the source, so it cannot collide with an existing `{name}.xlsx`):
+
+```bash
+TMP_X="{SOURCE_FOLDER}/.{name}.xls2xlsx.tmp"
+mkdir -p "$TMP_X"
+libreoffice --headless --convert-to xlsx --outdir "$TMP_X" "{SOURCE_FOLDER}/{name}.xls"
+```
+
+`XLSX_INPUT = $TMP_X/{name}.xlsx`. For `.xlsx` / `.xlsm`, `XLSX_INPUT` is the source file itself. Verify the converted file exists and is larger than 0 bytes.
+
+### 4c.2 — Convert
+
+```bash
+python3 "$XLSX_SCRIPT" \
+  --source   "$XLSX_INPUT" \
+  --original "{SOURCE_FOLDER}/{name}.{ext}" \
+  --output   "{output-path}/{name}.md" \
+  --max-rows "$XLSX_MAX_ROWS"
+```
+
+Where `{output-path}` is `$OUTPUT_PATH` if set, otherwise `{SOURCE_FOLDER}`. `--original` is needed only for `.xls` (so the frontmatter names the real source); it is harmless otherwise.
+
+The script writes one `## <sheet>` section per **visible** sheet (hidden sheets are listed in the frontmatter as `hidden_sheets`), with the first row of the used range as table header, merged cells written once, dates in ISO format, and `|` / newlines escaped. Charts, images and pivot tables are **not** extracted (the script reports how many it skipped).
+
+### 4c.3 — Formulas without cached values
+
+By default the script writes the values Excel stored in the file. If it warns `N celdas con fórmula sin valor calculado` (workbook generated by a library and never opened in Excel), recalculate it through LibreOffice and re-run Step 4c.2 on the result:
+
+```bash
+TMP_X="{SOURCE_FOLDER}/.{name}.recalc.tmp"; mkdir -p "$TMP_X"
+libreoffice --headless --convert-to xlsx --outdir "$TMP_X" "{SOURCE_FOLDER}/{name}.{ext}"
+# XLSX_INPUT = $TMP_X/{name}.xlsx
+```
+
+If the user explicitly wants formulas instead of results, add `--formulas`.
+
+### 4c.4 — Verify and clean up
+
+Verify `{name}.md` exists and is not empty, then remove the temporary folder(s) (`.{name}.xls2xlsx.tmp`, `.{name}.recalc.tmp`) with `rm -r`. Continue at Step 8 (review) — **for spreadsheets, only 8.1 (typos in headers/text) and 8.3 (table alignment) apply; never rewrite, merge or drop data rows or cells.**
 
 ---
 
@@ -478,6 +542,8 @@ Read the complete `{name}.md` **before making any modifications** — full conte
 
 ### 8.1 Spelling and grammar
 
+> Spreadsheets (Step 4c): see the note at the end of Step 4c — only 8.1 and 8.3 apply, and data is never altered.
+
 - Correct spelling and grammar errors.
 - Keep technical terms in their original language (do not translate class names, methods, commands, paths).
 
@@ -510,6 +576,8 @@ Read the complete `{name}.md` **before making any modifications** — full conte
 | Example continuity | Examples spanning multiple chunks must be seamlessly integrated |
 
 ### 8.5 Cleanup of temporary files
+
+> Spreadsheets have no chunk files — their temporary folders were already removed in Step 4c.4; skip this sub-step.
 
 Once `{name}.md` is confirmed correct, remove all temporary files from **`SOURCE_FOLDER`** (the folder of the source document — NOT from `OUTPUT_PATH`, which only contains the final `.md`):
 
@@ -556,6 +624,19 @@ For native PDF sources:
 ══════════════════════════════════════════
 ```
 
+For spreadsheets:
+```
+══════════════════════════════════════════
+  DOCUMENT CONVERTED SUCCESSFULLY
+══════════════════════════════════════════
+  Source:      {SOURCE_FOLDER}/budget.xlsx
+  Output:      {output-path}/budget.md
+  Sheets:      3 visible (1 hidden skipped)
+  Rows:        Ventas 120 · Grande 1000 (350 omitted) · Resumen 12
+  Temp files:  deleted
+══════════════════════════════════════════
+```
+
 Where `{output-path}` = `OUTPUT_PATH` if set, or `SOURCE_FOLDER` if null (co-located).
 
-**If the inventory has more files**, repeat Steps 4–9 for the next document in order.
+**If the inventory has more files**, repeat the document's route (Steps 4–9, or 4c → 8 → 9 for spreadsheets) for the next document in order.
