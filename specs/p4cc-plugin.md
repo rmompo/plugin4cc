@@ -79,6 +79,8 @@ Plugin version is `X.Y.Z`:
 
 | Version | Changes |
 |---------|---------|
+| 1.1.36 | `skill-doctor`: C6 now requires an install skill instead of setup |
+| 1.1.35 | `create`: align setup-skill convention with the rename to install (install creates folders, check verifies) |
 | 1.1.9 | Split manage into 6 independent skills: create, update, remove, skill-add, skill-update, skill-remove |
 | 1.0.3 | manage: full lifecycle rewrite — catalog-first sync, cache sync |
 | 1.0.2 | manage: update plugin.json template with skills/changelog structure |

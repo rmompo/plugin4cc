@@ -1,7 +1,7 @@
 ---
 name: skill-list
 description: Lists all p4cc-* plugin skills installed in the current CLI, in a table with columns plugin|skill|v|ready|description. Also invoked explicitly as /p4cc-core:skill-list.
-version: 22
+version: 32
 allowed-tools: [Bash, Read]
 ---
 

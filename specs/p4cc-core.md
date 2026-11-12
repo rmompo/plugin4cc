@@ -225,6 +225,7 @@ Read-only verification: `~/.p4cc/` and a valid, up-to-date `catalog.json`; the p
 
 | Version | Changes |
 |---------|---------|
+| 1.2.32 | `skill-list`: treat install and check as circular skills with an empty ready column |
 | 1.2.31 | Add `check` skill; `install` now creates folders/files and delegates verification to `check` |
 | 1.2.18 | Add `git-sanitize` skill — session-start CRLF hygiene enforcer |
 | 1.2.17 | `sanitize`: update argument-hint to `[path]` |

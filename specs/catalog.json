@@ -12,10 +12,14 @@
       "description": "Core productivity plugin: behavioral directives (P4CCD), intelligent model routing via subagents, and Conventional Commits enforcement.",
       "category": "productivity",
       "status": "stable",
-      "version": "1.2.31",
+      "version": "1.2.32",
       "spec": "specs/p4cc-core.md",
       "path": "plugins/p4cc-core",
       "changelog": [
+        {
+          "version": "1.2.32",
+          "changes": "skill-list: treat install and check as circular skills with an empty ready column"
+        },
         {
           "version": "1.2.31",
           "changes": "Add check skill; install now only installs and delegates verification to check"
@@ -157,8 +161,12 @@
         },
         {
           "name": "skill-list",
-          "version": 22,
+          "version": 32,
           "changelog": [
+            {
+              "version": 32,
+              "changes": "treat install and check as circular skills with an empty ready column"
+            },
             {
               "version": 22,
               "changes": "plugin version line format changed from v1.2.3 to (v1.2.3) with parentheses"
@@ -608,10 +616,18 @@
       "description": "Marketplace lifecycle tooling: create and manage plugins and skills with automatic version tracking.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.1.34",
+      "version": "1.1.36",
       "spec": "specs/p4cc-plugin.md",
       "path": "plugins/p4cc-plugin",
       "changelog": [
+        {
+          "version": "1.1.36",
+          "changes": "skill-doctor: C6 now requires an install skill instead of setup"
+        },
+        {
+          "version": "1.1.35",
+          "changes": "create: align setup-skill convention with the rename to install (install creates folders, check verifies)"
+        },
         {
           "version": "1.1.29",
           "changes": "create: enforce two-group alphabetical README.md convention in Step 7b"
@@ -708,8 +724,12 @@
       "skills": [
         {
           "name": "create",
-          "version": 31,
+          "version": 35,
           "changelog": [
+            {
+              "version": 35,
+              "changes": "align setup-skill convention with the rename to install (install creates folders, check verifies)"
+            },
             {
               "version": 24,
               "changes": "update setup scaffold to check both tool and plugin deps with unified type table"
@@ -796,8 +816,12 @@
         },
         {
           "name": "skill-doctor",
-          "version": 25,
+          "version": 36,
           "changelog": [
+            {
+              "version": 36,
+              "changes": "C6 now requires an install skill instead of setup"
+            },
             {
               "version": 25,
               "changes": "C6: clarify that setup must verify plugin deps via cache directory; add install instructions"

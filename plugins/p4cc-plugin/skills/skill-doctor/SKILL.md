@@ -1,7 +1,7 @@
 ---
 name: skill-doctor
 description: Audits plugin skills for version mismatches, frontmatter issues, allowed-tools gaps, catalog inconsistencies, and structural defects. Emits a prioritized findings report and offers to fix auto-correctable defects. Also invoked explicitly as /p4cc-plugin:skill-doctor.
-version: 25
+version: 36
 argument-hint: "[plugin] [skill]"
 allowed-tools: [Bash, Read, Write, Edit, AskUserQuestion]
 ---
