@@ -616,10 +616,42 @@
       "description": "Marketplace lifecycle tooling: create and manage plugins and skills with automatic version tracking.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.1.36",
+      "version": "1.1.44",
       "spec": "specs/p4cc-plugin.md",
       "path": "plugins/p4cc-plugin",
       "changelog": [
+        {
+          "version": "1.1.44",
+          "changes": "update: work with any marketplace: resolve repo, cache and global catalog dynamically"
+        },
+        {
+          "version": "1.1.43",
+          "changes": "skill-update: work with any marketplace; insert a missing version in the SKILL.md frontmatter"
+        },
+        {
+          "version": "1.1.42",
+          "changes": "skill-remove: work with any marketplace: resolve repo, cache and global catalog dynamically"
+        },
+        {
+          "version": "1.1.41",
+          "changes": "skill-doctor: work with any marketplace; offer a catalog bootstrap when it is missing; C1 handles a missing version"
+        },
+        {
+          "version": "1.1.40",
+          "changes": "skill-add: work with any marketplace: resolve repo, cache and global catalog dynamically"
+        },
+        {
+          "version": "1.1.39",
+          "changes": "remove: work with any marketplace: resolve repo, cache and global catalog dynamically"
+        },
+        {
+          "version": "1.1.38",
+          "changes": "doc-doctor: work with any marketplace; D8 honors docs_language from the catalog"
+        },
+        {
+          "version": "1.1.37",
+          "changes": "create: work with any marketplace: resolve repo, marketplace name, cache and global catalog dynamically; homepage and author from marketplace data"
+        },
         {
           "version": "1.1.36",
           "changes": "skill-doctor: C6 now requires an install skill instead of setup"
@@ -724,8 +756,12 @@
       "skills": [
         {
           "name": "create",
-          "version": 35,
+          "version": 37,
           "changelog": [
+            {
+              "version": 37,
+              "changes": "work with any marketplace: resolve repo, marketplace name, cache and global catalog dynamically; homepage and author from marketplace data"
+            },
             {
               "version": 35,
               "changes": "align setup-skill convention with the rename to install (install creates folders, check verifies)"
@@ -754,8 +790,12 @@
         },
         {
           "name": "update",
-          "version": 32,
+          "version": 44,
           "changelog": [
+            {
+              "version": 44,
+              "changes": "work with any marketplace: resolve repo, cache and global catalog dynamically"
+            },
             {
               "version": 30,
               "changes": "Step 4: update root README.md respecting two-group structure and alphabetical order"
@@ -768,8 +808,12 @@
         },
         {
           "name": "remove",
-          "version": 6,
+          "version": 39,
           "changelog": [
+            {
+              "version": 39,
+              "changes": "work with any marketplace: resolve repo, cache and global catalog dynamically"
+            },
             {
               "version": 6,
               "changes": "Extracted from manage skill"
@@ -778,8 +822,12 @@
         },
         {
           "name": "skill-add",
-          "version": 33,
+          "version": 40,
           "changelog": [
+            {
+              "version": 40,
+              "changes": "work with any marketplace: resolve repo, cache and global catalog dynamically"
+            },
             {
               "version": 19,
               "changes": "Update README.md when adding a skill"
@@ -792,8 +840,12 @@
         },
         {
           "name": "skill-update",
-          "version": 8,
+          "version": 43,
           "changelog": [
+            {
+              "version": 43,
+              "changes": "work with any marketplace; insert a missing version in the SKILL.md frontmatter"
+            },
             {
               "version": 8,
               "changes": "Extracted from manage skill"
@@ -802,8 +854,12 @@
         },
         {
           "name": "skill-remove",
-          "version": 34,
+          "version": 42,
           "changelog": [
+            {
+              "version": 42,
+              "changes": "work with any marketplace: resolve repo, cache and global catalog dynamically"
+            },
             {
               "version": 20,
               "changes": "Remove skill row from README.md on deletion"
@@ -816,8 +872,12 @@
         },
         {
           "name": "skill-doctor",
-          "version": 36,
+          "version": 41,
           "changelog": [
+            {
+              "version": 41,
+              "changes": "work with any marketplace; offer a catalog bootstrap when it is missing; C1 handles a missing version"
+            },
             {
               "version": 36,
               "changes": "C6 now requires an install skill instead of setup"
@@ -850,8 +910,12 @@
         },
         {
           "name": "doc-doctor",
-          "version": 26,
+          "version": 38,
           "changelog": [
+            {
+              "version": 38,
+              "changes": "work with any marketplace; D8 honors docs_language from the catalog"
+            },
             {
               "version": 26,
               "changes": "add D9: check plugin type:plugin dependencies documented in README.md"
