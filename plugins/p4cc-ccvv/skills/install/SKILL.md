@@ -1,11 +1,11 @@
 ---
-name: setup
-description: Verifies that all external dependencies (tools and plugins) required by p4cc-ccvv are installed and meet version constraints. Reports status with install instructions for each missing dependency. Also invoked explicitly as /p4cc-ccvv:setup.
-version: 16
+name: install
+description: Verifies that all external dependencies (tools and plugins) required by p4cc-ccvv are installed and meet version constraints. Reports status with install instructions for each missing dependency. Also invoked explicitly as /p4cc-ccvv:install.
+version: 17
 allowed-tools: [Bash]
 ---
 
-# p4cc-ccvv Setup
+# p4cc-ccvv Install
 
 Verifies that all required tools are available and prints a status report. Safe to re-run at any time.
 

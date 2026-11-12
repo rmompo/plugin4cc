@@ -113,22 +113,22 @@ Defect:    body uses <tool> but it is not in allowed-tools
 Mitigate:  add <tool> to allowed-tools list in SKILL.md frontmatter
 ```
 
-#### C6 — Plugin has dependencies but no setup skill  `MAJOR · [manual]`
-A plugin must have a skill named `setup` if **any** of the following is true:
+#### C6 — Plugin has dependencies but no install skill  `MAJOR · [manual]`
+A plugin must have a skill named `install` if **any** of the following is true:
 - `catalog["plugins"][plugin]["dependencies"]` is non-empty (plugin-level dependency)
 - Any skill in the plugin has `catalog["skills"][skill]["dependencies"]` non-empty (skill-level dependency)
 
 Check reported once per plugin, not per skill.
 
-The `setup` skill must verify **all dependency types**:
+The `install` skill must verify **all dependency types**:
 - `type: "tool"` — check via `which <name>` and compare version against constraint
 - `type: "plugin"` — check via `ls ~/.claude/plugins/cache/plugin4cc/<name>/` (installed if directory has at least one entry); install with `claude plugins install <name>`
 
 The status table must include a `Type` column to distinguish tools from plugins.
 
 ```
-Defect:    plugin has dependencies (plugin-level or skill-level) but no setup skill
-Mitigate:  create a setup skill with /p4cc-plugin:skill-add
+Defect:    plugin has dependencies (plugin-level or skill-level) but no install skill
+Mitigate:  create an install skill with /p4cc-plugin:skill-add
 ```
 
 #### C7 — Description missing "Also invoked" suffix  `MINOR · [auto]`

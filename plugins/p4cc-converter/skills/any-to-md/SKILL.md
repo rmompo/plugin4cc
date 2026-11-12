@@ -16,7 +16,7 @@ CONSOLIDATE_SCRIPT = <plugin-cache>/resources/scripts/all-to-md-consolidate.py
 
 Where `<plugin-cache>` = `~/.claude/plugins/cache/plugin4cc/p4cc-converter/<version>/`
 
-**Prerequisites:** run `/p4cc-converter:setup` first to verify tool availability.
+**Prerequisites:** run `/p4cc-converter:install` first to verify tool availability.
 
 **Processing model:** for each document in the inventory, run Steps 4 through 9 in full before moving to the next. Steps 4 and 5 reference "each file" within that per-document loop — not a batch over the whole inventory.
 
@@ -95,7 +95,7 @@ which libreoffice && libreoffice --version 2>&1 | head -1
 ```
 
 - `libreoffice` is **mandatory** only if the inventory will contain DOC/DOCX/PPT/PPTX files.
-- If any required tool is missing → stop and direct the user to run `/p4cc-converter:setup`.
+- If any required tool is missing → stop and direct the user to run `/p4cc-converter:install`.
 
 ---
 

@@ -79,7 +79,7 @@ pandoc input.md -o output.html --standalone --embed-resources
 cp input.md output.md
 ```
 
-If Pandoc fails: show full error and suggest running `/p4cc-ccvv:setup` to verify dependencies.
+If Pandoc fails: show full error and suggest running `/p4cc-ccvv:install` to verify dependencies.
 
 ---
 

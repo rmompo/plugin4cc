@@ -222,9 +222,13 @@
           ]
         },
         {
-          "name": "setup",
-          "version": 14,
+          "name": "install",
+          "version": 15,
           "changelog": [
+            {
+              "version": 15,
+              "changes": "Rename skill setup → install"
+            },
             {
               "version": 14,
               "changes": "add plugin dependency check to unified type table; update description"
@@ -441,9 +445,13 @@
       ],
       "skills": [
         {
-          "name": "setup",
-          "version": 16,
+          "name": "install",
+          "version": 17,
           "changelog": [
+            {
+              "version": 17,
+              "changes": "Rename skill setup → install"
+            },
             {
               "version": 16,
               "changes": "add plugin dependency check with unified type table; update description"
@@ -848,9 +856,13 @@
       ],
       "skills": [
         {
-          "name": "setup",
-          "version": 6,
+          "name": "install",
+          "version": 7,
           "changelog": [
+            {
+              "version": 7,
+              "changes": "Rename skill setup → install"
+            },
             {
               "version": 6,
               "changes": "add plugin dependency check with unified type table; update description"
@@ -937,9 +949,13 @@
       ],
       "skills": [
         {
-          "name": "setup",
-          "version": 1,
+          "name": "install",
+          "version": 2,
           "changelog": [
+            {
+              "version": 2,
+              "changes": "Rename skill setup → install"
+            },
             {
               "version": 1,
               "changes": "Initial release"

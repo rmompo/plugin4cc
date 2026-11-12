@@ -12,7 +12,7 @@ The output is a clean `.md` file with YAML frontmatter, proper heading hierarchy
 
 ---
 
-## Skill: `setup`
+## Skill: `install`
 
 ### Purpose
 
@@ -21,7 +21,7 @@ Verifies that all required external tools are installed and meet the minimum ver
 ### Invocation
 
 ```
-/p4cc-converter:setup
+/p4cc-converter:install
 ```
 
 ### Non-Goals

@@ -81,7 +81,7 @@ For each skill, resolve its dependency list with the following priority:
 2. **Plugin-level `dependencies`** — if the plugin has `dependencies` in `catalog.json` and the skill has none → use the plugin-level list
 3. **No dependencies** — if neither has `dependencies` → skill is unconditionally ready
 
-**Unconditional exception:** the `setup` skill always shows an empty `ready` column. It is the skill that performs the check — showing ✅/❌ there would be circular.
+**Unconditional exception:** the `install` skill always shows an empty `ready` column. It is the skill that performs the check — showing ✅/❌ there would be circular.
 
 For each dependency in the resolved list, check by type:
 
@@ -94,7 +94,7 @@ For each dependency in the resolved list, check by type:
 - **All dependencies satisfied** → `ready` = `✅`
 - **Any dependency missing** → `ready` = `❌`
 
-Version checking is not done here — only presence. Detailed version verification is the responsibility of each plugin's `setup` skill.
+Version checking is not done here — only presence. Detailed version verification is the responsibility of each plugin's `install` skill.
 
 ---
 
@@ -151,7 +151,7 @@ Las líneas de separadores parciales y las líneas de wrap **cuentan** como lín
 - **`plugin`**: ver §4.4. No se repite entre skills del mismo grupo.
 - **`skill`**: `🟢 {skill_name}` o `🔴 {skill_name}`. Solo en la primera línea física del skill.
 - **`v`**: versión entera del skill (`7`, `14`…). Solo en la primera línea física del skill.
-- **`ready`**: `✅` / `❌` según dependencias; **vacío** para el skill `setup` (excepción circular). Solo en la primera línea física del skill.
+- **`ready`**: `✅` / `❌` según dependencias; **vacío** para el skill `install` (excepción circular). Solo en la primera línea física del skill.
 - **`description`**: primera oración completa hasta ". Also invoked", sin truncar, sin ellipsis. Si supera 60 chars se hace **wrap** en líneas adicionales; las demás columnas quedan vacías en esas líneas extra.
 
 Orden de columnas: `plugin │ skill │ v │ ready │ description`
@@ -168,7 +168,7 @@ Orden de columnas: `plugin │ skill │ v │ ready │ description`
 │ (v1.0.15)             ├──────────────────────┼────┼───────┼──────────────────────────────────────────────────────────────┤
 │                        │ 🟢 generate          │ 14 │ ✅    │ Generates an adapted CV draft                                │
 │                        ├──────────────────────┼────┼───────┼──────────────────────────────────────────────────────────────┤
-│                        │ 🟢 setup             │ 15 │       │ Verifies external dependencies for p4cc-ccvv                 │
+│                        │ 🟢 install           │ 15 │       │ Verifies external dependencies for p4cc-ccvv                 │
 ├────────────────────────┼──────────────────────┼────┼───────┼──────────────────────────────────────────────────────────────┤
 │ 🟢 p4cc-core          │ 🟢 git-commit         │ 1  │ ✅    │ Enforces Conventional Commits format, translates to English, │
 │ (v1.2.18)             │                      │    │       │ and strips co-authorship lines                               │
@@ -176,7 +176,7 @@ Orden de columnas: `plugin │ skill │ v │ ready │ description`
 │                        │ 🟢 model-behaviour   │ 2  │ ✅    │ Loads and activates P4CCD behavioral directives for the      │
 │                        │                      │    │       │ session                                                      │
 │                        ├──────────────────────┼────┼───────┼──────────────────────────────────────────────────────────────┤
-│                        │ 🟢 setup             │ 14 │       │ Verifies external dependencies required by p4cc-core skills  │
+│                        │ 🟢 install           │ 14 │       │ Verifies external dependencies required by p4cc-core skills  │
 │                        ├──────────────────────┼────┼───────┼──────────────────────────────────────────────────────────────┤
 │                        │ 🟢 skill-list        │ 21 │ ✅    │ Lists all p4cc-* plugin skills installed in the current CLI  │
 └────────────────────────┴──────────────────────┴────┴───────┴──────────────────────────────────────────────────────────────┘

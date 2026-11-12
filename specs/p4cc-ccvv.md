@@ -12,14 +12,14 @@ All data is stored globally at `~/.p4cc/p4cc-ccvv/` following the p4cc-* scope c
 
 ---
 
-## Skill: `setup`
+## Skill: `install`
 
 ### Purpose
 Verifies that all required external tools (pandoc, pdflatex, python3) are available and correctly versioned.
 
 ### Invocation
 ```
-/p4cc-ccvv:setup
+/p4cc-ccvv:install
 ```
 
 ### Output

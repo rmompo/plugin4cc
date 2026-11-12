@@ -52,9 +52,9 @@ If not provided as arguments, use **AskUserQuestion** to collect:
 
 **Invocation:** `/p4cc-{container}:[subject-]{action}`
 
-### Setup skill convention
+### Install skill convention
 
-**If the plugin declares `dependencies`**, always scaffold a `setup` skill as the first skill (Z=1). The `setup` skill must:
+**If the plugin declares `dependencies`**, always scaffold a `install` skill as the first skill (Z=1). The `install` skill must:
 
 1. Read the full `dependencies` array from `catalog.json` for this plugin
 2. For each dependency, check by type:

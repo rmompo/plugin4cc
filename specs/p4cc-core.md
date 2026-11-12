@@ -190,7 +190,7 @@ Auto — fires at session start via the p4cc-core agent.
 
 ---
 
-## Skill: `setup`
+## Skill: `install`
 
 ### Purpose
 
@@ -199,7 +199,7 @@ Verify that all external tools required by p4cc-core skills are installed and re
 ### Invocation
 
 ```bash
-/p4cc-core:setup
+/p4cc-core:install
 ```
 
 ### Non-Goals

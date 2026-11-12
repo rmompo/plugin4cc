@@ -22,7 +22,7 @@ Input (PDF/DOC/DOCX/PPT/PPTX)
 
 | Skill | Invocation | What it does |
 |-------|-----------|--------------|
-| `setup` | `/p4cc-converter:setup` | Verifies that qpdf, python3, and libreoffice are installed |
+| `install` | `/p4cc-converter:install` | Verifies that qpdf, python3, and libreoffice are installed |
 | `any-to-md` | `/p4cc-converter:any-to-md [path]` | Converts documents to structured Markdown |
 
 ## Requirements
@@ -37,7 +37,7 @@ Input (PDF/DOC/DOCX/PPT/PPTX)
 
 ```bash
 # 1. Verify dependencies
-/p4cc-converter:setup
+/p4cc-converter:install
 
 # 2. Convert a document
 /p4cc-converter:any-to-md input/docs/manual.docx

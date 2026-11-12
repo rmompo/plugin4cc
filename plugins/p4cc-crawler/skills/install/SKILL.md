@@ -1,11 +1,11 @@
 ---
-name: setup
-description: Verifies that all external dependencies required by p4cc-crawler are installed — system tools (python3, curl) and pip packages (beautifulsoup4, html2text). Reports status with install instructions for each missing dependency. Also invoked explicitly as /p4cc-crawler:setup.
-version: 1
+name: install
+description: Verifies that all external dependencies required by p4cc-crawler are installed — system tools (python3, curl) and pip packages (beautifulsoup4, html2text). Reports status with install instructions for each missing dependency. Also invoked explicitly as /p4cc-crawler:install.
+version: 2
 allowed-tools: [Bash]
 ---
 
-# p4cc-crawler Setup
+# p4cc-crawler Install
 
 Verifies that all required tools and Python packages are available. Safe to re-run at any time.
 

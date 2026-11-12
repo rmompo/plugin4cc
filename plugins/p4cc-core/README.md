@@ -102,12 +102,12 @@ Ensures every git repo has correct line-ending hygiene. At session start, silent
 
 ---
 
-### 🔧 `setup`
+### 🔧 `install`
 
 Verifies that all external tools required by p4cc-core skills are installed and available in PATH. Reports status with install instructions for each missing dependency.
 
 **Invocation:**
-- Explicit — `/p4cc-core:setup`
+- Explicit — `/p4cc-core:install`
 
 ---
 

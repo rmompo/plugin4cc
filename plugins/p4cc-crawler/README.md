@@ -8,7 +8,7 @@ Supports authenticated sites (Joomla, form-based, HTTP Basic) and handles sessio
 
 | Skill | Invocation | Description |
 |-------|-----------|-------------|
-| `setup` | `/p4cc-crawler:setup` | Verifies python3, curl, and pip packages (beautifulsoup4, html2text). Reports status with install instructions. |
+| `install` | `/p4cc-crawler:install` | Verifies python3, curl, and pip packages (beautifulsoup4, html2text). Reports status with install instructions. |
 | `extract` | `/p4cc-crawler:extract` | Full pipeline: configure, crawl, deduplicate, filter, download, and generate structured Markdown output. |
 
 ## Installation
@@ -21,7 +21,7 @@ claude plugins install p4cc-crawler
 ## Usage
 
 ```
-/p4cc-crawler:setup    # check dependencies first
+/p4cc-crawler:install    # check dependencies first
 /p4cc-crawler:extract  # start an extraction session
 ```
 

@@ -18,13 +18,13 @@ claude plugin install p4cc-core@plugin4cc
 
 | Plugin | Status | Skills | Auto-setup |
 |--------|--------|--------|------------|
-| [`p4cc-core`](./p4cc-core/README.md) | stable | `model-behaviour`, `model-route`, `git-commit`, `git-sanitize`, `sanitize`, `skill-list`, `setup` | ✅ via agent |
+| [`p4cc-core`](./p4cc-core/README.md) | stable | `model-behaviour`, `model-route`, `git-commit`, `git-sanitize`, `sanitize`, `skill-list`, `install` | ✅ via agent |
 | [`p4cc-statusline`](./p4cc-statusline/README.md) | stable | `install` | ✅ via agent |
 | [`p4cc-buddy`](./p4cc-buddy/README.md) | beta | `gcomp` | — |
 | [`p4cc-plugin`](./p4cc-plugin/README.md) | beta | `create`, `update`, `remove`, `skill-add`, `skill-update`, `skill-remove`, `skill-doctor`, `doc-doctor` | — |
-| [`p4cc-ccvv`](./p4cc-ccvv/README.md) | beta | `setup`, `profile-gather`, `profile-update`, `generate`, `regen`, `export` | — |
-| [`p4cc-converter`](./p4cc-converter/README.md) | beta | `setup`, `any-to-md` | — |
-| [`p4cc-crawler`](./p4cc-crawler/README.md) | beta | `setup`, `extract` | — |
+| [`p4cc-ccvv`](./p4cc-ccvv/README.md) | beta | `install`, `profile-gather`, `profile-update`, `generate`, `regen`, `export` | — |
+| [`p4cc-converter`](./p4cc-converter/README.md) | beta | `install`, `any-to-md` | — |
+| [`p4cc-crawler`](./p4cc-crawler/README.md) | beta | `install`, `extract` | — |
 | [`p4cc-agent`](./p4cc-agent/README.md) | beta | `md-check`, `md-checkrefs` | — |
 | [`p4cc-coding`](./p4cc-coding/README.md) | beta | `code-standards`, `typescript-standards`, `python-standards`, `go-standards`, `java-standards`, `code-review` | ✅ via agent |
 

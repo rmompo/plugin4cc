@@ -1,11 +1,11 @@
 ---
-name: setup
-description: Verifies that all external dependencies (tools and plugins) required by p4cc-core skills are installed and available. Reports status with install instructions for each missing dependency. Also invoked explicitly as /p4cc-core:setup.
-version: 14
+name: install
+description: Verifies that all external dependencies (tools and plugins) required by p4cc-core skills are installed and available. Reports status with install instructions for each missing dependency. Also invoked explicitly as /p4cc-core:install.
+version: 15
 allowed-tools: [Bash]
 ---
 
-# p4cc-core Setup
+# p4cc-core Install
 
 Checks that all external tools required by p4cc-core skills are present and reachable. Safe to re-run at any time.
 
@@ -116,5 +116,5 @@ If all tools are present:
 If any tool is missing:
 ```
 ✅ ~/.p4cc/catalog.json installed.
-❌ N dependency/dependencies missing. Install the tools above and re-run /p4cc-core:setup.
+❌ N dependency/dependencies missing. Install the tools above and re-run /p4cc-core:install.
 ```

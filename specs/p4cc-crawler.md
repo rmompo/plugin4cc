@@ -12,14 +12,14 @@ Designed for intranet documentation extraction. Supports authenticated sites (Jo
 
 ---
 
-## Skill: `setup`
+## Skill: `install`
 
 ### Purpose
 Verifies that all runtime dependencies are installed: system tools (python3, curl) from catalog, and pip packages (beautifulsoup4, html2text). Reports each dependency with its status and install instructions. Also checks for the optional playwright package (required only for SPA mode).
 
 ### Invocation
 ```
-/p4cc-crawler:setup
+/p4cc-crawler:install
 ```
 
 ### Non-Goals

@@ -1,11 +1,11 @@
 ---
-name: setup
-description: Verifies that all external dependencies (tools and plugins) required by p4cc-converter are installed and meet minimum version constraints. Also invoked explicitly as /p4cc-converter:setup.
-version: 6
+name: install
+description: Verifies that all external dependencies (tools and plugins) required by p4cc-converter are installed and meet minimum version constraints. Also invoked explicitly as /p4cc-converter:install.
+version: 7
 allowed-tools: [Bash]
 ---
 
-# Setup — Dependency Check
+# Install — Dependency Check
 
 Verifies that all tools required by `p4cc-converter` are installed and meet the minimum version constraints defined in `catalog.json`.
 
@@ -130,7 +130,7 @@ If all tools are ✅:
 
 If any tool is ❌:
 ```
-❌ Missing dependencies detected. Install the tools above and run /p4cc-converter:setup again.
+❌ Missing dependencies detected. Install the tools above and run /p4cc-converter:install again.
 ```
 
 This skill is idempotent — safe to re-run at any time.
