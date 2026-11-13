@@ -39,8 +39,8 @@ Spreadsheets (XLS / XLSX / XLSM) skip the PDF route:
 
 | Skill | Invocation | What it does |
 |-------|-----------|--------------|
-| `install` | `/p4cc-converter:install` | Installs the catalog copy, then runs `check`. |
-| `check` | `/p4cc-converter:check` | Read-only check of qpdf, python3, libreoffice, openpyxl, optional OCR tools and the conversion and detection scripts. Reports how to fix anything missing. |
+| `install` | `/p4cc-converter:install` | Installs the marketplace `catalog.json` copy under `~/.p4cc/`. Options: `--dry-run`, `--json`, `--home DIR`. |
+| `check` | `/p4cc-converter:check` | Read-only check of folders, catalog, tools and shipped files; `STATE\|ID\|detail` lines, `--json`, exit codes. |
 | `any-to-md` | `/p4cc-converter:any-to-md [path]` | Converts documents to structured Markdown (OCR for scanned pages, direct table extraction for spreadsheets) |
 
 ## Requirements

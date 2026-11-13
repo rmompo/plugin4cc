@@ -1,6 +1,6 @@
 # Plugin Spec: p4cc-converter
 
-> **Status:** `beta` | **Version:** `1.0.10`
+> **Status:** `beta` | **Version:** `1.0.14`
 
 ---
 
@@ -15,31 +15,43 @@ The output is a clean `.md` file with YAML frontmatter, proper heading hierarchy
 ## Skill: `install`
 
 ### Purpose
-Installs the `catalog.json` copy, then runs `check`.
+Installs the marketplace `catalog.json` copy under `~/.p4cc/`. Idempotent. A real run is followed by `check`.
 
 ### Invocation
 ```
-/p4cc-converter:install
+/p4cc-converter:install [--dry-run] [--json] [--home DIR]
 ```
 
+### Options
+- `--dry-run` — resolves everything, **writes nothing**, prints the exact plan (`DRY|create|modify|<path>`) and ends with `RESUMEN|DRY|…` instead of `RESUMEN|OK|…`. Dry-run and real run share one code path.
+- `--json` — machine-readable output. `--home DIR` — replaces `~` for `~/.p4cc/` (also `P4CC_HOME`).
+- Exit codes: `0` ok · `1` failure · `2` bad usage · `3` precondition not met.
+
 ### Non-Goals
-- Does not install tools automatically
+- Never installs external tools: `check` reports the command the person must run.
+- Never writes another marketplace's `~/.p4cc/catalog.json` (it is left untouched and reported), nor the Claude Code cache.
 
 ---
 
 ## Skill: `check`
 
 ### Purpose
-Read-only verification of qpdf, python3, libreoffice (version constraints), `openpyxl` (⚠️ when missing — only needed for spreadsheets), the optional OCR tools (ocrmypdf, tesseract + languages, pdftotext — ⚠️ when missing) and the shipped consolidation script. Prints a status table and install instructions for anything missing.
+Read-only verification. Verifies `qpdf`, `python3`, `libreoffice` (version constraints), the three shipped scripts and — as WARN, never FAIL — `openpyxl`, `ocrmypdf`, `tesseract` with its languages and `pdftotext`. Reports how to install anything missing.
 
 ### Invocation
 ```
-/p4cc-converter:check
+/p4cc-converter:check [--json] [--lines] [--home DIR]
 ```
 
+### Output
+- Default (script): one line per finding, `STATE|ID|detail` (`OK`, `INFO`, `WARN`, `FAIL`), then `RESUMEN|<n> FAIL|<m> WARN`. IDs are stable across versions: `folder-*`, `catalog-*`, `res-*`, `tool-*`, `pkg-*`, `ocr-lang-*`, `profile-*`.
+- `--json` — `{plugin, skill, findings[{estado, id, detalle, componente}], summary{fail, warn}}`.
+- Invoked as a skill without options it shows the human presentation (`--table`), fed by the same findings.
+- Exit codes: `0` no failures · `1` failures · `2` bad usage · `3` precondition not met.
+
 ### Non-Goals
-- Does not install tools automatically
-- `check` never modifies anything
+- Never creates, modifies or installs anything.
+- Optional components (OCR, Playwright, `openpyxl`…) are WARN, never FAIL.
 
 ---
 
@@ -60,7 +72,7 @@ Converts one or more documents (PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, XLSM) to M
 ### Invocation
 
 ```
-/p4cc-converter:any-to-md [path/to/file-or-folder-or-glob] [--ocr auto|always|never]
+/p4cc-converter:any-to-md [path/to/file-or-folder-or-glob] [--ocr auto|always|never] [--out DIR]
 ```
 
 ### Environment variables
@@ -73,6 +85,11 @@ Converts one or more documents (PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, XLSM) to M
 | `AGENT_ALL_TO_MD_OCR` | `auto` | OCR mode: `auto` (only documents with at least one page without text layer, detected with `pdftotext`; skipped with a warning if OCR tools are missing), `always` (`ocrmypdf --force-ocr`), `never` |
 | `AGENT_ALL_TO_MD_OCR_LANG` | `spa+eng` | Tesseract language(s), `+`-separated |
 | `AGENT_ALL_TO_MD_XLSX_MAX_ROWS` | `1000` | Max data rows per spreadsheet sheet; `0` = no limit |
+
+### Output folder and stability window
+
+- `--out <folder>` — same as `AGENT_ALL_TO_MD_OUTPUT` and it wins over it (`--out source` = co-located).
+- `P4CC_STABLE_SECONDS` (default `5`, `0` disables) — files modified more recently than that are skipped as `unstable` so something still being copied is never converted half-written; they are picked up by the next run.
 
 ### OCR behaviour
 
@@ -154,6 +171,11 @@ When OCR was applied: `ocr: true`, `ocr_tool: ocrmypdf`, `ocr_lang: <lang>`.
 
 | Version | Changes |
 |---------|---------|
+| 1.0.14 | any-to-md: add --out <folder> and the P4CC_STABLE_SECONDS stability window (skips files modified a few seconds ago) |
+| 1.0.13 | check: STATE\|ID\|detail output, --json, --table and exit codes from the shared check engine |
+| 1.0.12 | install: add --dry-run, --json and --home; creates folders and the catalog copy through the shared check engine |
+| 1.0.6 | setup: add plugin dep check with unified type table |
+| 1.0.5 | setup: read dependencies[] instead of requires[] |
 | 1.0.11 | `check`: raise python3 minimum to >=3.10.0 |
 | 1.0.10 | `any-to-md` detects the real format by content (`detect-format.py`): handles wrong/missing extensions, skips unsupported content with an explanation; scripts record `source` and real `source_format`; `check` verifies the new script |
 | 1.0.9 | Add spreadsheet support (XLS/XLSX/XLSM): Step 4c, `xlsx-to-md.py` (openpyxl), `AGENT_ALL_TO_MD_XLSX_MAX_ROWS`; `check` verifies openpyxl |
