@@ -1,79 +1,51 @@
 ---
 name: install
 description: One-time setup skill for p4cc-statusline. Installs the statusline script and activates it in ~/.claude/settings.json. Invoke once after installing the plugin. Also invoked explicitly as /p4cc-statusline:install.
-version: 6
-argument-hint: []
-allowed-tools: [Bash, Read, Edit]
+version: 7
+argument-hint: "[--dry-run] [--json] [--yes] [--home DIR]"
+allowed-tools: [Bash, AskUserQuestion]
 ---
 
-# p4cc-statusline Setup
+# p4cc-statusline Install
 
-Installs the custom statusline for Claude Code. Run once after installing the plugin.
+Installs the custom statusline for Claude Code. Run once after installing the plugin. Idempotent — safe to run multiple times.
 
 ## What it does
 
-1. Copies `statusline-command.sh` from the plugin to `~/.claude/`
-2. Makes it executable
-3. Patches `~/.claude/settings.json` to activate it
+1. Copies `statusline-command.sh` from the plugin to `~/.claude/` and makes it executable
+2. Adds or updates the `statusLine` block in `~/.claude/settings.json` (a minimal patch: every other key and the file's indentation are preserved)
 
 ---
 
-## Step 1 — Locate the script
+## Engine
 
-The script is bundled at `<plugin-root>/statusline/statusline-command.sh`.
-
-Find it with:
+The logic lives in a script shipped with the plugin, so a dry-run and a real run execute the same code:
 
 ```bash
-find ~/.claude/plugins -name "statusline-command.sh" 2>/dev/null | grep p4cc-statusline | head -1
+# <Base directory for this skill> is shown when the skill is loaded; the script is two levels up
+INSTALLER="<Base directory for this skill>/../../statusline/install.py"
+python3 "$INSTALLER" [--dry-run] [--json] [--yes] [--home DIR]
 ```
 
----
+| Option | Meaning |
+|--------|---------|
+| `--dry-run` | Resolve everything, **write nothing**, print the exact plan (`DRY\|create\|modify\|backup\|<path>`) and end with `RESUMEN\|DRY\|…` instead of `RESUMEN\|OK\|…` |
+| `--yes` | Overwrite a *different* existing `statusLine` value |
+| `--json` | Machine-readable output |
+| `--home DIR` | Replaces `~` (same as `P4CC_HOME`) |
 
-## Step 2 — Install the script
+Output: `STATE|ID|detail` lines (`OK`, `DRY`, `INFO`, `WARN`) and a final `RESUMEN|…` line. Exit codes: **0** · **1** failure · **2** bad usage · **3** precondition not met (script missing, `settings.json` invalid, or a different `statusLine` exists and `--yes` was not given).
 
-```bash
-cp "<plugin-root>/statusline/statusline-command.sh" "$HOME/.claude/statusline-command.sh"
-chmod +x "$HOME/.claude/statusline-command.sh"
-```
-
-Skip if the file already exists and is identical.
-
----
-
-## Step 3 — Patch settings.json
-
-Read `~/.claude/settings.json` and add or update the `statusLine` block:
-
-```json
-"statusLine": {
-  "type": "command",
-  "command": "bash ~/.claude/statusline-command.sh"
-}
-```
-
-- Already configured with this exact command → skip.
-- Different value already set → ask the user before overwriting.
-- Key absent → add it.
-
-Use the Edit tool for a minimal patch, not a full rewrite.
+**Write scope.** Configuring Claude Code is this skill's purpose, so — unlike the other p4cc skills — it writes `~/.claude/statusline-command.sh` and `~/.claude/settings.json`. It never writes the plugin cache. Before modifying an existing file it keeps a copy next to it, `<file>.p4cc-bak-<timestamp>` (mode `0600`), and prints where. Nothing is restored automatically; to undo, copy the backup over the file.
 
 ---
 
-## Step 4 — Confirm
+## Steps
 
-| Step | Result |
-|------|--------|
-| Script | ✅ `~/.claude/statusline-command.sh` |
-| settings.json | ✅ `statusLine` activated |
-
-> 💡 Restart Claude Code if the statusline does not appear immediately.
-
----
-
-## Idempotent
-
-Safe to run multiple times — skips steps that are already done.
+1. Run `python3 "$INSTALLER" --dry-run` first when the person asked for a dry-run, and stop there.
+2. Otherwise run `python3 "$INSTALLER"`.
+3. If it exits **3** because a different `statusLine` is already configured, show the current value and ask with **AskUserQuestion** whether to overwrite it; on yes re-run with `--yes`, on no stop.
+4. Show the output as is. Restart Claude Code if the statusline does not appear immediately.
 
 ---
 

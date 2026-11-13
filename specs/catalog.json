@@ -355,10 +355,14 @@
       "description": "Claude Code-exclusive enhancements: custom statusline with project path, git branch, active model with effort level and color-coded usage metrics.",
       "category": "productivity",
       "status": "stable",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "spec": "specs/p4cc-statusline.md",
       "path": "plugins/p4cc-statusline",
       "changelog": [
+        {
+          "version": "1.0.7",
+          "changes": "install: add --dry-run, --yes, --json and --home; backup of settings.json before modifying; minimal JSON patch"
+        },
         {
           "version": "1.0.6",
           "changes": "statusline: when the fully shortened CWD still overflows, collapse hidden levels into ~/… …/last"
@@ -391,8 +395,12 @@
       "skills": [
         {
           "name": "install",
-          "version": 6,
+          "version": 7,
           "changelog": [
+            {
+              "version": 7,
+              "changes": "add --dry-run, --yes, --json and --home; backup of settings.json before modifying; minimal JSON patch"
+            },
             {
               "version": 6,
               "changes": "Install script with the final ~/… …/last CWD fallback"
