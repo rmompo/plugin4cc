@@ -1,0 +1,110 @@
+{
+  "plugin": "p4cc-converter",
+  "marketplace": "plugin4cc",
+  "folders": [
+    "~/.p4cc"
+  ],
+  "resources": [
+    "resources/scripts/all-to-md-consolidate.py",
+    "resources/scripts/xlsx-to-md.py",
+    "resources/scripts/detect-format.py"
+  ],
+  "tools": [
+    {
+      "id": "qpdf",
+      "cmd": "qpdf",
+      "required": ">=10.0.0",
+      "level": "required",
+      "install": {
+        "apt": "sudo apt install qpdf",
+        "dnf": "sudo dnf install qpdf",
+        "brew": "brew install qpdf",
+        "winget": "winget install qpdf"
+      },
+      "used_by": "any-to-md"
+    },
+    {
+      "id": "python3",
+      "cmd": "python3",
+      "required": ">=3.10.0",
+      "level": "required",
+      "install": {
+        "apt": "sudo apt install python3",
+        "dnf": "sudo dnf install python3",
+        "brew": "brew install python",
+        "winget": "winget install Python.Python.3"
+      },
+      "used_by": "any-to-md"
+    },
+    {
+      "id": "libreoffice",
+      "cmd": "libreoffice",
+      "required": ">=7.0.0",
+      "level": "required",
+      "install": {
+        "apt": "sudo apt install libreoffice",
+        "dnf": "sudo dnf install libreoffice",
+        "brew": "brew install --cask libreoffice",
+        "winget": "winget install TheDocumentFoundation.LibreOffice"
+      },
+      "used_by": "any-to-md (non-PDF inputs, XLS)"
+    },
+    {
+      "id": "ocrmypdf",
+      "cmd": "ocrmypdf",
+      "required": "*",
+      "level": "optional",
+      "used_by": "any-to-md OCR",
+      "install": {
+        "apt": "sudo apt install ocrmypdf",
+        "dnf": "sudo dnf install ocrmypdf",
+        "brew": "brew install ocrmypdf",
+        "winget": "pip install ocrmypdf"
+      }
+    },
+    {
+      "id": "tesseract",
+      "cmd": "tesseract",
+      "required": "*",
+      "level": "optional",
+      "used_by": "any-to-md OCR",
+      "install": {
+        "apt": "sudo apt install tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng",
+        "dnf": "sudo dnf install tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng",
+        "brew": "brew install tesseract tesseract-lang",
+        "winget": "winget install UB-Mannheim.TesseractOCR"
+      }
+    },
+    {
+      "id": "pdftotext",
+      "cmd": "pdftotext",
+      "version_args": [
+        "-v"
+      ],
+      "required": "*",
+      "level": "optional",
+      "used_by": "any-to-md OCR detection",
+      "install": {
+        "apt": "sudo apt install poppler-utils",
+        "dnf": "sudo dnf install poppler-utils",
+        "brew": "brew install poppler"
+      }
+    }
+  ],
+  "python_packages": [
+    {
+      "id": "openpyxl",
+      "module": "openpyxl",
+      "level": "optional",
+      "used_by": "spreadsheets only",
+      "install": {
+        "apt": "sudo apt install python3-openpyxl",
+        "pip": "pip install openpyxl"
+      }
+    }
+  ],
+  "tesseract_langs": {
+    "env": "AGENT_ALL_TO_MD_OCR_LANG",
+    "default": "spa+eng"
+  }
+}
