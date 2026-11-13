@@ -1,8 +1,8 @@
 ---
 name: remove
 description: Removes a plugin and all its files from the repo, and every catalog. Never touches the Claude Code cache. Destructive — requires explicit confirmation. Also invoked explicitly as /p4cc-plugin:remove with the plugin name.
-version: 58
-argument-hint: "<plugin> [--yes] [--dry-run] [--json] [--repo PATH] [--home DIR] [--allow-dirty]"
+version: 63
+argument-hint: "<plugin> [--soft|--restore] [--yes] [--dry-run] [--json] [--repo PATH] [--home DIR] [--allow-dirty]"
 allowed-tools: [Bash, AskUserQuestion]
 ---
 
@@ -58,6 +58,17 @@ It deletes `plugins/<plugin>/` and `specs/<plugin>.md`, removes the entry from `
 ### Output and exit codes
 
 One line per item, `STATE|ID|detail` (`STATE` ∈ `OK`, `INFO`, `WARN`, `FAIL`, `DRY`), then a final `RESUMEN|…` line. Exit codes: **0** no failures · **1** failures found · **2** bad usage · **3** precondition not met (no repo, no catalog, ambiguous repo, uncommitted changes).
+
+---
+
+### Logical removal (`--soft` / `--restore`)
+
+`--soft` retires the plugin in the catalog without deleting any file: `status` becomes `deprecated`, the previous status is kept in `retired: {from_status, at}`, the status column of `plugins/README.md` is updated and a changelog line is added. `--restore` puts the previous status back. No confirmation is needed because nothing is lost; a backup of what changes is still kept first. They are mutually exclusive.
+
+```bash
+python3 "$ENGINE" remove <plugin> --soft      # retire (reversible)
+python3 "$ENGINE" remove <plugin> --restore   # bring it back
+```
 
 ---
 

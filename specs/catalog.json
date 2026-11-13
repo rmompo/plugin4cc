@@ -688,10 +688,14 @@
       "description": "Marketplace lifecycle tooling: create and manage plugins and skills with automatic version tracking.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.1.62",
+      "version": "1.1.63",
       "spec": "specs/p4cc-plugin.md",
       "path": "plugins/p4cc-plugin",
       "changelog": [
+        {
+          "version": "1.1.63",
+          "changes": "remove: add --soft/--restore: logical removal that retires the plugin (status deprecated) without deleting files"
+        },
         {
           "version": "1.1.62",
           "changes": "skill-remove: add --soft/--restore: logical removal that marks the skill as retired in the catalog without deleting files"
@@ -972,8 +976,12 @@
         },
         {
           "name": "remove",
-          "version": 58,
+          "version": 63,
           "changelog": [
+            {
+              "version": 63,
+              "changes": "add --soft/--restore: logical removal that retires the plugin (status deprecated) without deleting files"
+            },
             {
               "version": 58,
               "changes": "add --dry-run, --json, --yes, backup before deleting, --repo and --home"
