@@ -1,8 +1,8 @@
 ---
 name: skill-remove
 description: Removes a skill from a plugin. Deletes the SKILL.md, and updates catalog.json (Z does not decrease). Never touches the Claude Code cache. Destructive — requires explicit confirmation. Also invoked explicitly as /p4cc-plugin:skill-remove with the plugin and skill name.
-version: 56
-argument-hint: "<plugin> <skill> [--yes] [--dry-run] [--json] [--repo PATH] [--home DIR] [--allow-dirty]"
+version: 62
+argument-hint: "<plugin> <skill> [--soft|--restore] [--yes] [--dry-run] [--json] [--repo PATH] [--home DIR] [--allow-dirty]"
 allowed-tools: [Bash, AskUserQuestion]
 ---
 
@@ -62,6 +62,17 @@ The backup folder must be ignored by git: add `.p4cc/` to `.gitignore` or `.git/
 ### Output and exit codes
 
 One line per item, `STATE|ID|detail` (`STATE` ∈ `OK`, `INFO`, `WARN`, `FAIL`, `DRY`), then a final `RESUMEN|…` line. Exit codes: **0** no failures · **1** failures found · **2** bad usage · **3** precondition not met (no repo, no catalog, ambiguous repo, uncommitted changes).
+
+---
+
+### Logical removal (`--soft` / `--restore`)
+
+`--soft` marks the skill as retired in the catalog (`retired: {at: <date>}` plus a plugin changelog line) **without deleting any file**, so nothing is lost and no confirmation is needed; `--restore` undoes it. Z is not touched. They are mutually exclusive, and a backup of the catalog is still kept first.
+
+```bash
+python3 "$ENGINE" skill-remove <plugin> <skill> --soft      # retire (reversible)
+python3 "$ENGINE" skill-remove <plugin> <skill> --restore   # bring it back
+```
 
 ---
 

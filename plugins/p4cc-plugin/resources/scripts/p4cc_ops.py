@@ -703,7 +703,9 @@ def cmd_skill_add(env, args):
 def cmd_skill_remove(env, args):
     cat = require_catalog(env)
     plugin = find_plugin(cat, args.plugin)
-    find_skill(plugin, args.skill)
+    skill = find_skill(plugin, args.skill)
+    if args.soft or args.restore:
+        return logical_skill(env, args, cat, plugin, skill)
     if not args.yes and not args.dry_run:
         raise Usage("skill-remove is destructive: pass --yes (the skill asks the user first) or use --dry-run")
     plan = Plan(env, args.dry_run, backup=True, check_dirty=True, allow_dirty=args.allow_dirty)
@@ -720,6 +722,58 @@ def cmd_skill_remove(env, args):
         plan.write_text(pr, plugins_readme_edit(pr.read_text(encoding="utf-8"), plugin["name"], remove_skill=args.skill), "Skills column")
     res = plan.run()
     emit_write_result("skill-remove", res, args, {"plugin": plugin["name"], "skill": args.skill, "plugin_version": plugin["version"]})
+    return EXIT_OK
+
+
+def logical_skill(env, args, cat, plugin, skill):
+    """--soft marks the skill as retired in the catalog (no file is deleted); --restore undoes it."""
+    if args.soft and args.restore:
+        raise Usage("--soft and --restore are mutually exclusive")
+    if args.soft and skill.get("retired"):
+        raise Usage(f"skill '{skill['name']}' is already retired")
+    if args.restore and not skill.get("retired"):
+        raise Usage(f"skill '{skill['name']}' is not retired")
+    plan = Plan(env, args.dry_run, backup=True, check_dirty=True, allow_dirty=args.allow_dirty)
+    if args.soft:
+        skill["retired"] = {"at": dt.date.today().isoformat()}
+        msg = f"Retire {skill['name']} skill (soft remove; files kept)"
+    else:
+        skill.pop("retired", None)
+        msg = f"Restore {skill['name']} skill"
+    plugin["changelog"].insert(0, {"version": plugin["version"], "changes": msg})
+    plan.write_json(env.catalog_path, cat, f"Z unchanged ({plugin['version']}); no files deleted")
+    plan.sync_global_catalog(cat)
+    res = plan.run()
+    emit_write_result("skill-remove", res, args, {"plugin": plugin["name"], "skill": skill["name"],
+                      "mode_detail": "soft remove" if args.soft else "restore"})
+    return EXIT_OK
+
+
+def logical_plugin(env, args, cat, plugin):
+    """--soft marks the plugin as deprecated/retired in the catalog (no file is deleted); --restore undoes it."""
+    if args.soft and args.restore:
+        raise Usage("--soft and --restore are mutually exclusive")
+    if args.soft and plugin.get("retired"):
+        raise Usage(f"plugin '{plugin['name']}' is already retired")
+    if args.restore and not plugin.get("retired"):
+        raise Usage(f"plugin '{plugin['name']}' is not retired")
+    plan = Plan(env, args.dry_run, backup=True, check_dirty=True, allow_dirty=args.allow_dirty)
+    if args.soft:
+        plugin["retired"] = {"from_status": plugin["status"], "at": dt.date.today().isoformat()}
+        plugin["status"] = "deprecated"
+        msg = "Retire plugin (soft remove; files kept)"
+    else:
+        plugin["status"] = plugin["retired"].get("from_status", "beta")
+        plugin.pop("retired", None)
+        msg = "Restore plugin"
+    plugin["changelog"].insert(0, {"version": plugin["version"], "changes": msg})
+    plan.write_json(env.catalog_path, cat, f"status -> {plugin['status']}; no files deleted")
+    plan.sync_global_catalog(cat)
+    pr = env.repo / "plugins" / "README.md"
+    if pr.is_file():
+        plan.write_text(pr, plugins_readme_edit(pr.read_text(encoding="utf-8"), plugin["name"], status=plugin["status"]), "status column")
+    res = plan.run()
+    emit_write_result("remove", res, args, {"plugin": plugin["name"], "mode_detail": "soft remove" if args.soft else "restore"})
     return EXIT_OK
 
 
@@ -774,6 +828,8 @@ def cmd_update(env, args):
 def cmd_remove(env, args):
     cat = require_catalog(env)
     plugin = find_plugin(cat, args.plugin)
+    if args.soft or args.restore:
+        return logical_plugin(env, args, cat, plugin)
     if not args.yes and not args.dry_run:
         raise Usage("remove is destructive and irreversible: pass --yes (the skill asks the user first) or use --dry-run")
     plan = Plan(env, args.dry_run, backup=True, check_dirty=True, allow_dirty=args.allow_dirty)
@@ -1419,9 +1475,11 @@ def build_parser():
     p = sub.add_parser("skill-add", parents=[common]); p.add_argument("plugin"); p.add_argument("skill")
     p.add_argument("--description"); p.add_argument("--argument-hint", dest="argument_hint"); p.add_argument("--allowed-tools", dest="allowed_tools")
     p = sub.add_parser("skill-remove", parents=[common]); p.add_argument("plugin"); p.add_argument("skill")
+    p.add_argument("--soft", action="store_true"); p.add_argument("--restore", action="store_true")
     p = sub.add_parser("update", parents=[common]); p.add_argument("plugin"); p.add_argument("--description"); p.add_argument("--status", choices=["proposal", "accepted", "beta", "stable", "production", "deprecated"])
     p.add_argument("--bump", choices=["none", "y", "x"], default="none"); p.add_argument("--change")
     p = sub.add_parser("remove", parents=[common]); p.add_argument("plugin")
+    p.add_argument("--soft", action="store_true"); p.add_argument("--restore", action="store_true")
     p = sub.add_parser("create", parents=[common]); p.add_argument("plugin"); p.add_argument("--description")
     p.add_argument("--category", default="productivity", choices=sorted(CATEGORIES)); p.add_argument("--status", default="beta", choices=["proposal", "accepted", "beta", "stable", "production", "deprecated"])
     p.add_argument("--scope", action="append", choices=["global", "local", "local-gitignore"]); p.add_argument("--dep-tool", action="append", dest="dep_tool")
