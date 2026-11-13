@@ -1,0 +1,23 @@
+{
+  "plugin": "p4cc-core",
+  "marketplace": "plugin4cc",
+  "folders": [
+    "~/.p4cc"
+  ],
+  "resources": [],
+  "tools": [
+    {
+      "id": "git",
+      "cmd": "git",
+      "required": "*",
+      "level": "required",
+      "install": {
+        "apt": "sudo apt install git",
+        "dnf": "sudo dnf install git",
+        "brew": "brew install git",
+        "winget": "winget install Git.Git"
+      },
+      "used_by": "git-commit"
+    }
+  ]
+}
