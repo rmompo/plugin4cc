@@ -624,10 +624,14 @@
       "description": "Marketplace lifecycle tooling: create and manage plugins and skills with automatic version tracking.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.1.58",
+      "version": "1.1.59",
       "spec": "specs/p4cc-plugin.md",
       "path": "plugins/p4cc-plugin",
       "changelog": [
+        {
+          "version": "1.1.59",
+          "changes": "create: add --dry-run, --json, non-interactive options, --repo and --home"
+        },
         {
           "version": "1.1.58",
           "changes": "remove: add --dry-run, --json, --yes, backup before deleting, --repo and --home"
@@ -820,8 +824,12 @@
       "skills": [
         {
           "name": "create",
-          "version": 46,
+          "version": 59,
           "changelog": [
+            {
+              "version": 59,
+              "changes": "add --dry-run, --json, non-interactive options, --repo and --home"
+            },
             {
               "version": 46,
               "changes": "stop writing to the Claude Code cache; the cache is managed by /plugin"
