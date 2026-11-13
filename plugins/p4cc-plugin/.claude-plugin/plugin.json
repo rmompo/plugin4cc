@@ -1,6 +1,6 @@
 {
   "name": "p4cc-plugin",
-  "version": "1.1.60",
+  "version": "1.1.61",
   "description": "Plugin lifecycle management: scaffolding, updating and publishing Claude Code plugins.",
   "author": {
     "name": "rmompo",
