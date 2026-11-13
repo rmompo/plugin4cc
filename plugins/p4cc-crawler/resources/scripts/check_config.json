@@ -1,0 +1,73 @@
+{
+  "plugin": "p4cc-crawler",
+  "marketplace": "plugin4cc",
+  "folders": [
+    "~/.p4cc"
+  ],
+  "resources": [
+    "scripts/crawl.py",
+    "scripts/dedup.py",
+    "scripts/download.py",
+    "scripts/filter.py",
+    "scripts/generate.py"
+  ],
+  "tools": [
+    {
+      "id": "python3",
+      "cmd": "python3",
+      "required": ">=3.10.0",
+      "level": "required",
+      "install": {
+        "apt": "sudo apt install python3",
+        "dnf": "sudo dnf install python3",
+        "brew": "brew install python",
+        "winget": "winget install Python.Python.3"
+      },
+      "used_by": "all scripts"
+    },
+    {
+      "id": "curl",
+      "cmd": "curl",
+      "required": "*",
+      "level": "required",
+      "install": {
+        "apt": "sudo apt install curl",
+        "dnf": "sudo dnf install curl",
+        "brew": "brew install curl",
+        "winget": "winget install cURL.cURL"
+      },
+      "used_by": "extract (static sites)"
+    }
+  ],
+  "python_packages": [
+    {
+      "id": "beautifulsoup4",
+      "module": "bs4",
+      "level": "required",
+      "used_by": "crawl",
+      "install": {
+        "apt": "sudo apt install python3-bs4",
+        "pip": "pip install beautifulsoup4"
+      }
+    },
+    {
+      "id": "html2text",
+      "module": "html2text",
+      "level": "required",
+      "used_by": "generate",
+      "install": {
+        "apt": "sudo apt install python3-html2text",
+        "pip": "pip install html2text"
+      }
+    },
+    {
+      "id": "playwright",
+      "module": "playwright",
+      "level": "optional",
+      "used_by": "SPA mode",
+      "install": {
+        "pip": "pip install playwright && playwright install chromium"
+      }
+    }
+  ]
+}

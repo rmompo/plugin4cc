@@ -1305,7 +1305,7 @@
       "description": "Web crawler and documentation extractor: crawls sites (static or SPA/Storybook), filters by topic, downloads attachments, and generates structured Markdown output.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "spec": "specs/p4cc-crawler.md",
       "path": "plugins/p4cc-crawler",
       "scopes": [
@@ -1324,6 +1324,10 @@
         }
       ],
       "changelog": [
+        {
+          "version": "1.0.5",
+          "changes": "install: add --dry-run, --json and --home; creates folders and the catalog copy through the shared check engine"
+        },
         {
           "version": "1.0.4",
           "changes": "check: raise python3 minimum to >=3.10.0"
@@ -1344,8 +1348,12 @@
       "skills": [
         {
           "name": "install",
-          "version": 3,
+          "version": 5,
           "changelog": [
+            {
+              "version": 5,
+              "changes": "add --dry-run, --json and --home; creates folders and the catalog copy through the shared check engine"
+            },
             {
               "version": 3,
               "changes": "install now creates folders/files and delegates verification to check"
