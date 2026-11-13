@@ -624,10 +624,14 @@
       "description": "Marketplace lifecycle tooling: create and manage plugins and skills with automatic version tracking.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.1.54",
+      "version": "1.1.55",
       "spec": "specs/p4cc-plugin.md",
       "path": "plugins/p4cc-plugin",
       "changelog": [
+        {
+          "version": "1.1.55",
+          "changes": "skill-add: add --dry-run, --json, --repo and --home; runs through the shared ops engine"
+        },
         {
           "version": "1.1.54",
           "changes": "skill-update: add --dry-run, --json, --repo and --home; runs through the shared ops engine"
@@ -886,8 +890,12 @@
         },
         {
           "name": "skill-add",
-          "version": 49,
+          "version": 55,
           "changelog": [
+            {
+              "version": 55,
+              "changes": "add --dry-run, --json, --repo and --home; runs through the shared ops engine"
+            },
             {
               "version": 49,
               "changes": "stop writing to the Claude Code cache; the cache is managed by /plugin"
