@@ -25,7 +25,7 @@ If the line does not fit the terminal width, the path is shortened with `…` fr
 
 | Skill | Invocation | What it does |
 |-------|-----------|--------------|
-| `install` | `/p4cc-statusline:install` · once after install | Installs script and activates statusline |
+| `install` | `/p4cc-statusline:install` · once after install | Installs the script and activates the statusline. Options: `--dry-run`, `--yes`, `--json`, `--home DIR`; keeps a `0600` backup of `settings.json` before changing it |
 
 ## Installation
 

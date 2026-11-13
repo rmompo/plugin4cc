@@ -1,6 +1,6 @@
 # Plugin Spec: p4cc-statusline
 
-> **Status:** `stable` | **Version:** `1.0.6`
+> **Status:** `stable` | **Version:** `1.0.7`
 
 ---
 
@@ -23,6 +23,16 @@ Install the statusline script and activate it in Claude Code's settings. Runs au
 ```bash
 /p4cc-statusline:install    # manual install or reinstall
 ```
+
+### Options and safety
+```
+/p4cc-statusline:install [--dry-run] [--json] [--yes] [--home DIR]
+```
+- `--dry-run` — resolves everything, writes nothing, prints the plan (`DRY|create|modify|backup|<path>`) and ends with `RESUMEN|DRY|…`; dry-run and real run share one code path (`statusline/install.py`).
+- `--yes` — overwrite a *different* existing `statusLine` value (without it the install stops with exit `3`, and the skill asks first).
+- Before modifying an existing `~/.claude/settings.json` or script it keeps `<file>.p4cc-bak-<timestamp>` (mode `0600`). The JSON patch preserves every other key and the file's indentation.
+- **Write scope**: configuring Claude Code is this skill's purpose, so it writes `~/.claude/statusline-command.sh` and `~/.claude/settings.json` — never the plugin cache.
+- Exit codes: `0` · `1` failure · `2` bad usage · `3` precondition not met.
 
 ### Auto-setup behavior
 
@@ -63,6 +73,8 @@ Path shortening: when the line does not fit the terminal width, only the `⌂ pa
 
 | Version | Changes |
 |---------|---------|
+| 1.0.7 | install: add --dry-run, --yes, --json and --home; backup of settings.json before modifying; minimal JSON patch |
+| 1.0.2 | Rename setup skill directory to match canonical name |
 | 1.0.6 | statusline: when the fully shortened CWD still overflows, collapse hidden levels into ~/… …/last |
 | 1.0.5 | statusline: reserve 5 columns of right slack so the line is never truncated by Claude Code |
 | 1.0.4 | statusline: shorten the CWD with … (highest level first, last level never) when the line does not fit the terminal width |
