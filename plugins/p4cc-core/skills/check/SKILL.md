@@ -1,149 +1,46 @@
 ---
 name: check
 description: Read-only verification of the p4cc-core infrastructure — folders, files, external tools and plugin resources. Reports status and tells how to install anything missing. Also invoked explicitly as /p4cc-core:check.
-version: 31
+version: 34
+argument-hint: "[--json] [--lines] [--home DIR]"
 allowed-tools: [Bash]
 ---
 
 # p4cc-core Check
 
-Verifies that the whole infrastructure required by p4cc-core is in place: folders and files, external tools and the plugin's own resources. **Read-only** — never creates, modifies or installs anything. For each problem it prints how to fix it. Safe to re-run at any time.
+Read-only verification of everything p4cc-core needs: folders, the global catalog, the files the plugin ships, external tools and optional components. It **never creates, changes or installs anything**; for each problem it prints how to fix it. Safe to re-run at any time.
 
 ---
 
-## Step 1 — Read requirements from catalog
+## Engine
+
+The logic lives in a script shipped with the plugin, so the result is identical however the skill is invoked (and usable from a shell or CI):
 
 ```bash
-CATALOG=~/.p4cc/catalog.json
-# Fallback: marketplace install path (used before ~/.p4cc/catalog.json is created)
-[ ! -f "$CATALOG" ] && CATALOG=~/.claude/plugins/marketplaces/plugin4cc/specs/catalog.json
+# <Base directory for this skill> is shown when the skill is loaded; the engine is two levels up
+ENGINE="<Base directory for this skill>/../../resources/scripts/check_engine.py"
+python3 "$ENGINE" check [--json | --table] [--home DIR]
 ```
 
-Read `catalog["plugins"]["p4cc-core"]["dependencies"]` and the `dependencies` of each of its skills. Collect the deduplicated list, preserving each `type`. If the catalog cannot be found, fall back to the tables below.
+## What it checks
+
+- **Folders:** `~/.p4cc/`.
+- **Global catalog:** `~/.p4cc/catalog.json` exists, is valid and is up to date with the marketplace copy.
+- **Tools:** `git` (used by `git-commit`).
+
+Tool versions are read from the plugin's `dependencies` in the catalog (`~/.p4cc/catalog.json`), falling back to the values shipped with the plugin.
 
 ---
 
-## Step 2 — Check folders and files
+## How to run it
 
-| Path | Purpose |
-|------|---------|
-| `~/.p4cc/` | global p4cc data folder |
-| `~/.p4cc/catalog.json` | marketplace catalog copy (file) |
+1. Without options (a person invoking the skill) run `python3 "$ENGINE" check --table` and show the result: a Markdown table plus, for each ❌/⚠️, the install commands for every platform.
+2. With `--json` run `python3 "$ENGINE" check --json` and print it as is.
+3. With `--lines` run `python3 "$ENGINE" check` (the `STATE|ID|detail` lines) and print it as is.
+4. Add `--home DIR` when the user passed it (it replaces `~` for `~/.p4cc/`).
 
-```bash
-[ -d ~/.p4cc/ ] && echo "✅ ~/.p4cc/" || echo "❌ ~/.p4cc/"
-[ -f ~/.p4cc/catalog.json ] && echo "✅ ~/.p4cc/catalog.json" || echo "❌ ~/.p4cc/catalog.json"
-```
+### Output and exit codes
 
-```bash
-# Catalog copy must exist and be valid JSON
-python3 -c "import json,os; json.load(open(os.path.expanduser('~/.p4cc/catalog.json')))" 2>&1 \
-  || echo "invalid-or-missing"
+Default (script): one line per finding, `STATE|ID|detail` (`STATE` ∈ `OK`, `INFO`, `WARN`, `FAIL`), then `RESUMEN|<n> FAIL|<m> WARN`. IDs are stable across versions (`folder-*`, `catalog-*`, `res-*`, `tool-*`, `pkg-*`, `ocr-lang-*`, `profile-*`). `--json` gives `{plugin, skill, findings[], summary}`. Exit codes: **0** no failures · **1** failures · **2** bad usage · **3** precondition not met. Tools are never installed: every problem comes with the command the person has to run.
 
-# Marketplace source (to detect an outdated copy)
-_src=$(find ~/.claude/plugins/marketplaces -path "*/plugin4cc*/specs/catalog.json" 2>/dev/null | head -1)
-[ -n "$_src" ] && ! diff -q "$_src" ~/.p4cc/catalog.json >/dev/null 2>&1 && echo "outdated"
-```
-
-- Missing / invalid catalog → ❌, fix: `/p4cc-core:install`
-- Copy differs from the marketplace one → ⚠️ outdated, fix: `/p4cc-core:install`
-
-Any ❌ here is fixed by running `/p4cc-core:install`.
-
----
-
-## Step 3 — Check plugin resources
-
-The plugin ships no extra resource files. Only check that the plugin cache exists:
-
-```bash
-ls -d ~/.claude/plugins/cache/plugin4cc/p4cc-core/*/ 2>/dev/null || echo "❌ plugin cache not found"
-```
-
-If missing: `claude plugins install p4cc-core`.
-
----
-
-## Step 4 — Check external tools
-
-For each dependency, check by type:
-
-| Type | How to check |
-|------|-------------|
-| `tool` | `which <name> 2>/dev/null && <name> --version 2>&1 \| head -1` — then verify the version constraint |
-| `plugin` | `ls ~/.claude/plugins/cache/plugin4cc/<name>/ 2>/dev/null` — installed if the directory has at least one entry |
-
-Currently required:
-
-| Type | Name | Required | Used by |
-|------|------|----------|---------|
-| `tool` | `git` | `*` | `git-commit` |
-
-```bash
-which git && git --version 2>&1
-```
-
----
-
-## Step 5 — Print status report
-
-```
-══════════════════════════════════════════
-  p4cc-core CHECK
-══════════════════════════════════════════
-```
-
-One table per area (Folders, Plugin resources, Tools):
-
-| Area | Item | Required | Found | Status |
-|------|------|----------|-------|--------|
-| folder | `~/.p4cc/` | exists | exists | ✅ |
-| tool | `git` | `*` | — | ❌ |
-
-- ✅ = present and version constraint satisfied
-- ❌ = missing or below the minimum version
-- ⚠️ = optional component missing, or outdated copy
-
----
-
-## Step 6 — How to install what is missing
-
-For each ❌ / ⚠️ item print the matching fix. **Never run these commands yourself** — only show them.
-
-**Folders / catalog:** run `/p4cc-core:install`.
-
-### `git`
-
-**Debian / Ubuntu / WSL:**
-```bash
-sudo apt install git
-```
-
-**RHEL / Fedora:**
-```bash
-sudo dnf install git
-```
-
-**macOS:**
-```bash
-brew install git
-```
-
-**Windows (PowerShell):**
-```powershell
-winget install Git.Git
-```
-
----
-
-## Step 7 — Verdict
-
-All required items ✅:
-```
-✅ p4cc-core infrastructure is complete. No action required.
-```
-
-Any required item ❌:
-```
-❌ N item(s) missing. Apply the fixes above, then re-run /p4cc-core:check.
-```
+If any `folder-*` / `catalog-*` finding fails, the fix is `/p4cc-core:install`. Any other ❌ is fixed by the command shown next to it (the person runs it; this skill never does).

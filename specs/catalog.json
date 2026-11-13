@@ -12,10 +12,14 @@
       "description": "Core productivity plugin: behavioral directives (P4CCD), intelligent model routing via subagents, and Conventional Commits enforcement.",
       "category": "productivity",
       "status": "stable",
-      "version": "1.2.33",
+      "version": "1.2.34",
       "spec": "specs/p4cc-core.md",
       "path": "plugins/p4cc-core",
       "changelog": [
+        {
+          "version": "1.2.34",
+          "changes": "check: STATE|ID|detail output, --json, --table and exit codes from the shared check engine"
+        },
         {
           "version": "1.2.33",
           "changes": "install: add --dry-run, --json and --home; creates folders and the catalog copy through the shared check engine"
@@ -308,8 +312,12 @@
         },
         {
           "name": "check",
-          "version": 31,
+          "version": 34,
           "changelog": [
+            {
+              "version": 34,
+              "changes": "STATE|ID|detail output, --json, --table and exit codes from the shared check engine"
+            },
             {
               "version": 31,
               "changes": "Initial release — read-only check of folders, files and tools"
