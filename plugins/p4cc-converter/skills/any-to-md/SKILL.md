@@ -1,8 +1,8 @@
 ---
 name: any-to-md
 description: Converts PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and XLSM documents to structured Markdown, detecting each file's real format from its content (not its extension). Text documents go through a 9-step pipeline (inventory → LibreOffice → optional OCR → qpdf split → LLM extraction → Python consolidation → LLM review, scanned pages OCR'd automatically); spreadsheets are read directly with openpyxl, one table per sheet. Also invoked explicitly as /p4cc-converter:any-to-md.
-version: 10
-argument-hint: "[path/to/file-or-folder-or-glob] [--ocr auto|always|never]"
+version: 14
+argument-hint: "[path/to/file-or-folder-or-glob] [--ocr auto|always|never] [--out DIR]"
 allowed-tools: [Bash, Read, Write, AskUserQuestion]
 ---
 
@@ -80,6 +80,7 @@ If the input path is already a **single file** or a **full glob** → skip this 
 ### 1.3 — Output path
 
 Resolve in order of precedence:
+0. **Flag `--out <folder>`** — same meaning as `AGENT_ALL_TO_MD_OUTPUT` and it wins over it. The folder must be an absolute path that exists (or that you offer to create); `--out source` means co-located.
 1. **Environment variable `AGENT_ALL_TO_MD_OUTPUT`**:
    - If unset, empty, or equal to `"source"` → `OUTPUT_PATH = null` (co-located mode)
    - Otherwise → `OUTPUT_PATH = <value>` (must be an absolute path; validate it exists or offer to create it)
@@ -209,6 +210,14 @@ If `mismatch = false`: `SOURCE_FOLDER = ORIG_FOLDER`, no copy, nothing changes.
 - If the target `.md` does not exist → include in inventory.
 
 Sort the inventory alphabetically by path.
+
+**Stability window.** Skip any file whose modification time is more recent than `P4CC_STABLE_SECONDS` seconds ago (default `5`; `0` disables the check), so something that is still being copied is never converted half-written. Skipped files are reported as `unstable`, with their age, and are picked up by the next run:
+
+```bash
+STABLE=${P4CC_STABLE_SECONDS:-5}
+age=$(( $(date +%s) - $(stat -c %Y "$file") ))
+if [ "$STABLE" -gt 0 ] && [ "$age" -lt "$STABLE" ]; then echo "SKIP|unstable|$file (modified ${age}s ago, window ${STABLE}s)"; fi
+```
 
 **If there are skipped files AND `reprocess = false` (not forced by env var in Step 1.4)**, ask the user:
 ```

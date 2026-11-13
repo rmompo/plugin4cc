@@ -1169,10 +1169,14 @@
       "description": "Converts documents to Markdown (PDF, DOC, DOCX, PPT, PPTX) using a multi-step local tool pipeline.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.13",
+      "version": "1.0.14",
       "spec": "specs/p4cc-converter.md",
       "path": "plugins/p4cc-converter",
       "changelog": [
+        {
+          "version": "1.0.14",
+          "changes": "any-to-md: add --out <folder> and the P4CC_STABLE_SECONDS stability window (skips files modified a few seconds ago)"
+        },
         {
           "version": "1.0.13",
           "changes": "check: STATE|ID|detail output, --json, --table and exit codes from the shared check engine"
@@ -1263,8 +1267,12 @@
         },
         {
           "name": "any-to-md",
-          "version": 10,
+          "version": 14,
           "changelog": [
+            {
+              "version": 14,
+              "changes": "add --out <folder> and the P4CC_STABLE_SECONDS stability window (skips files modified a few seconds ago)"
+            },
             {
               "version": 10,
               "changes": "Detect real format by content instead of extension (Step 3)"
