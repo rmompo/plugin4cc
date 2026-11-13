@@ -465,13 +465,17 @@
       "description": "AI-powered CV generation and management — multi-user profiles, job offer adaptation, and multi-format export.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.18",
+      "version": "1.0.19",
       "spec": "specs/p4cc-ccvv.md",
       "path": "plugins/p4cc-ccvv",
       "scopes": [
         "global"
       ],
       "changelog": [
+        {
+          "version": "1.0.19",
+          "changes": "install: add --dry-run, --json and --home; creates folders and the catalog copy through the shared check engine"
+        },
         {
           "version": "1.0.18",
           "changes": "check: raise python3 minimum to >=3.10.0"
@@ -520,8 +524,12 @@
       "skills": [
         {
           "name": "install",
-          "version": 17,
+          "version": 19,
           "changelog": [
+            {
+              "version": 19,
+              "changes": "add --dry-run, --json and --home; creates folders and the catalog copy through the shared check engine"
+            },
             {
               "version": 17,
               "changes": "install now creates folders/files and delegates verification to check"

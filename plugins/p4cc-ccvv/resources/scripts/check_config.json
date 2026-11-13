@@ -1,0 +1,67 @@
+{
+  "plugin": "p4cc-ccvv",
+  "marketplace": "plugin4cc",
+  "folders": [
+    "~/.p4cc",
+    "~/.p4cc/p4cc-ccvv",
+    "~/.p4cc/p4cc-ccvv/profiles"
+  ],
+  "resources": [
+    "resources/CV-GENERATION-GUIDELINES.md",
+    "resources/templates/cv-template.md",
+    "resources/templates/cv-template-photo.md",
+    "resources/templates/cv-template-nophoto.md",
+    "resources/schemas/cvs.schema.json",
+    "resources/schemas/profile.schema.json",
+    "resources/schemas/profiles.schema.json"
+  ],
+  "profiles": {
+    "root": "~/.p4cc/p4cc-ccvv/profiles",
+    "subdirs": [
+      "input",
+      "data",
+      "output"
+    ]
+  },
+  "tools": [
+    {
+      "id": "pandoc",
+      "cmd": "pandoc",
+      "required": ">=2.0.0",
+      "level": "required",
+      "install": {
+        "apt": "sudo apt install pandoc",
+        "dnf": "sudo dnf install pandoc",
+        "brew": "brew install pandoc",
+        "winget": "winget install JohnMacFarlane.Pandoc"
+      },
+      "used_by": "export"
+    },
+    {
+      "id": "pdflatex",
+      "cmd": "pdflatex",
+      "required": "*",
+      "level": "required",
+      "install": {
+        "apt": "sudo apt install texlive-latex-base texlive-latex-recommended texlive-fonts-recommended",
+        "dnf": "sudo dnf install texlive-latex-base texlive-latex-recommended texlive-fonts-recommended",
+        "brew": "brew install --cask mactex-no-gui",
+        "winget": "winget install MiKTeX.MiKTeX"
+      },
+      "used_by": "export (PDF)"
+    },
+    {
+      "id": "python3",
+      "cmd": "python3",
+      "required": ">=3.10.0",
+      "level": "required",
+      "install": {
+        "apt": "sudo apt install python3",
+        "dnf": "sudo dnf install python3",
+        "brew": "brew install python",
+        "winget": "winget install Python.Python.3"
+      },
+      "used_by": "profile-gather"
+    }
+  ]
+}
