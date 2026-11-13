@@ -1329,7 +1329,7 @@
       "description": "Web crawler and documentation extractor: crawls sites (static or SPA/Storybook), filters by topic, downloads attachments, and generates structured Markdown output.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "spec": "specs/p4cc-crawler.md",
       "path": "plugins/p4cc-crawler",
       "scopes": [
@@ -1348,6 +1348,10 @@
         }
       ],
       "changelog": [
+        {
+          "version": "1.0.6",
+          "changes": "check: STATE|ID|detail output, --json, --table and exit codes from the shared check engine"
+        },
         {
           "version": "1.0.5",
           "changes": "install: add --dry-run, --json and --home; creates folders and the catalog copy through the shared check engine"
@@ -1404,8 +1408,12 @@
         },
         {
           "name": "check",
-          "version": 4,
+          "version": 6,
           "changelog": [
+            {
+              "version": 6,
+              "changes": "STATE|ID|detail output, --json, --table and exit codes from the shared check engine"
+            },
             {
               "version": 4,
               "changes": "raise python3 minimum to >=3.10.0"
