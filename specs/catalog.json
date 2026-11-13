@@ -1145,10 +1145,14 @@
       "description": "Converts documents to Markdown (PDF, DOC, DOCX, PPT, PPTX) using a multi-step local tool pipeline.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.12",
+      "version": "1.0.13",
       "spec": "specs/p4cc-converter.md",
       "path": "plugins/p4cc-converter",
       "changelog": [
+        {
+          "version": "1.0.13",
+          "changes": "check: STATE|ID|detail output, --json, --table and exit codes from the shared check engine"
+        },
         {
           "version": "1.0.12",
           "changes": "install: add --dry-run, --json and --home; creates folders and the catalog copy through the shared check engine"
@@ -1265,8 +1269,12 @@
         },
         {
           "name": "check",
-          "version": 11,
+          "version": 13,
           "changelog": [
+            {
+              "version": 13,
+              "changes": "STATE|ID|detail output, --json, --table and exit codes from the shared check engine"
+            },
             {
               "version": 11,
               "changes": "raise python3 minimum to >=3.10.0"
