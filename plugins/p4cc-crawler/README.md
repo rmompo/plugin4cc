@@ -8,8 +8,8 @@ Supports authenticated sites (Joomla, form-based, HTTP Basic) and handles sessio
 
 | Skill | Invocation | Description |
 |-------|-----------|-------------|
-| `install` | `/p4cc-crawler:install` | Installs the catalog copy, then runs `check`. |
-| `check` | `/p4cc-crawler:check` | Read-only check of python3, curl, pip packages (beautifulsoup4, html2text, optional playwright) and scripts. Reports how to fix anything missing. |
+| `install` | `/p4cc-crawler:install` | Installs the marketplace `catalog.json` copy under `~/.p4cc/`. Options: `--dry-run`, `--json`, `--home DIR`. |
+| `check` | `/p4cc-crawler:check` | Read-only check of folders, catalog, tools and shipped files; `STATE\|ID\|detail` lines, `--json`, exit codes. |
 | `extract` | `/p4cc-crawler:extract` | Full pipeline: configure, crawl, deduplicate, filter, download, and generate structured Markdown output. |
 
 ## Installation
