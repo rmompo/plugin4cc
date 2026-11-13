@@ -120,6 +120,12 @@ Read-only verification of the p4cc-core infrastructure: `~/.p4cc/` and `catalog.
 
 ---
 
+## Skills
+
+| Skill | Invocation | Description |
+|-------|-----------|-------------|
+| `sanitize` | `/p4cc-core:sanitize` | Scans all files that may contain sensitive information across the repo and offers to anonymize findings |
+
 ## Installation
 
 ```bash

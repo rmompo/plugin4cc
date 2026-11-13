@@ -1,6 +1,6 @@
 # Plugin Spec: p4cc-core
 
-> **Status:** `stable` | **Version:** `1.2.29`
+> **Status:** `stable` | **Version:** `1.2.37`
 
 ---
 
@@ -139,18 +139,42 @@ Ensure every `git commit` follows the [Conventional Commits v1.0.0](https://www.
 ## Skill: `skill-list`
 
 ### Purpose
-
-Print a table of all installed p4cc-* plugin skills with their version, tool availability, enabled status, and description. Reads from the CLI cache and `catalog.json` to produce an always-current view.
+Lists the p4cc-* skills installed in the Claude Code plugin cache with their catalog version and `ready` status (dependencies present). Read-only.
 
 ### Invocation
-
-```bash
-/p4cc-core:skill-list
+```
+/p4cc-core:skill-list [--json] [--lines] [--home DIR]
 ```
 
+### Output
+- Default (script): `STATE|<plugin>:<skill>|v<N> ready=<yes|no|n/a> enabled=<yes|no> — <description>` per skill (`OK`, or `WARN` when a dependency is missing), then `RESUMEN|0 FAIL|<m> WARN`. `--json` gives `{plugin, skill, findings[], summary}`.
+- Invoked as a skill without options it shows the Unicode table (`--table`) and the footer `N plugins · M skills · M enabled`, fed by the same data.
+- Exit codes: `0` · `2` bad usage · `3` no plugin cache found. `install` and `check` always show an empty `ready` column.
+
 ### Non-Goals
-- Does not install or enable skills — read-only view
-- Does not check skill logic or correctness — use `/p4cc-plugin:skill-doctor` for that
+- Does not verify tool versions (each plugin's `check` does).
+- Never writes anything.
+
+---
+
+## Skill: `sanitize`
+
+### Purpose
+Scans the repository's text files for sensitive information (credentials, infrastructure, PII, company data, financial and special-category data) and offers to replace findings with safe placeholders.
+
+### Invocation
+```
+/p4cc-core:sanitize [path] [--dry-run] [--repo PATH]
+```
+
+### Options and safety
+- `--dry-run` — runs the scan and prints the exact plan, one `DRY|modify|<file>:<line> (<category>) <masked> -> <placeholder>` line per replacement, ending with `RESUMEN|DRY|…`; writes nothing and asks nothing.
+- `--repo PATH` — repository to scan (same as `P4CC_REPO`). Resolution: flag → `P4CC_REPO` → git root → walk up to `.claude-plugin/marketplace.json`; never an unbounded `find ~`.
+- **Backup before editing**: files about to be modified are copied to `<repo>/.p4cc/bak/<timestamp>/files/` (dirs `0700`, files `0600`). Nothing is restored automatically.
+- **Secrets are never printed in full**: only category, line, the first 3 characters + `***` and the length; `.env` contents are never shown.
+
+### Non-Goals
+- Does not rewrite git history.
 
 ---
 
@@ -184,6 +208,11 @@ Auto — fires at session start via the p4cc-core agent.
 *.png binary  *.jpg binary  *.woff binary  *.vsix binary  ...
 ```
 
+### Options and safety
+- `--dry-run` (explicit invocation) — runs every detection step, writes nothing (no `.gitattributes`, `git config`, `sed -i`, `git add`/`update-index`, no backup) and prints the plan as `DRY|create|modify|<target> (<what>)`, ending with `RESUMEN|DRY|…`. All writes go through one gate, so dry-run and real run share the code.
+- Files that already exist are copied to `<repo>/.p4cc/bak/<timestamp>/files/` (dirs `0700`, files `0600`) before being modified.
+- CRLF detection uses `git ls-files --eol` (no dependency on the `file` command).
+
 ### Non-Goals
 - Does not modify files without user confirmation
 - Does not affect user's `core.autocrlf` git config — operates at repo level via `.gitattributes`
@@ -193,31 +222,43 @@ Auto — fires at session start via the p4cc-core agent.
 ## Skill: `install`
 
 ### Purpose
-Creates `~/.p4cc/` and installs the marketplace `catalog.json` copy, then runs `check`.
+Creates `~/.p4cc/` and installs the marketplace `catalog.json` copy. Idempotent. A real run is followed by `check`.
 
 ### Invocation
 ```
-/p4cc-core:install
+/p4cc-core:install [--dry-run] [--json] [--home DIR]
 ```
 
+### Options
+- `--dry-run` — resolves everything, **writes nothing**, prints the exact plan (`DRY|create|modify|<path>`) and ends with `RESUMEN|DRY|…` instead of `RESUMEN|OK|…`. Dry-run and real run share one code path.
+- `--json` — machine-readable output. `--home DIR` — replaces `~` for `~/.p4cc/` (also `P4CC_HOME`).
+- Exit codes: `0` ok · `1` failure · `2` bad usage · `3` precondition not met.
+
 ### Non-Goals
-- Does not install external tools automatically
+- Never installs external tools: `check` reports the command the person must run.
+- Never writes another marketplace's `~/.p4cc/catalog.json` (it is left untouched and reported), nor the Claude Code cache.
 
 ---
 
 ## Skill: `check`
 
 ### Purpose
-Read-only verification: `~/.p4cc/` and a valid, up-to-date `catalog.json`; the plugin cache; and `git` (required by `git-commit`) with its version. Prints a status table with install instructions for anything missing.
+Read-only verification. Verifies `~/.p4cc/` and a valid, up-to-date `catalog.json`, and the tool `git` (used by `git-commit`). Reports how to install anything missing.
 
 ### Invocation
 ```
-/p4cc-core:check
+/p4cc-core:check [--json] [--lines] [--home DIR]
 ```
 
+### Output
+- Default (script): one line per finding, `STATE|ID|detail` (`OK`, `INFO`, `WARN`, `FAIL`), then `RESUMEN|<n> FAIL|<m> WARN`. IDs are stable across versions: `folder-*`, `catalog-*`, `res-*`, `tool-*`, `pkg-*`, `ocr-lang-*`, `profile-*`.
+- `--json` — `{plugin, skill, findings[{estado, id, detalle, componente}], summary{fail, warn}}`.
+- Invoked as a skill without options it shows the human presentation (`--table`), fed by the same findings.
+- Exit codes: `0` no failures · `1` failures · `2` bad usage · `3` precondition not met.
+
 ### Non-Goals
-- Does not install external tools automatically
-- `check` never modifies anything
+- Never creates, modifies or installs anything.
+- Optional components (OCR, Playwright, `openpyxl`…) are WARN, never FAIL.
 
 ---
 
@@ -225,6 +266,24 @@ Read-only verification: `~/.p4cc/` and a valid, up-to-date `catalog.json`; the p
 
 | Version | Changes |
 |---------|---------|
+| 1.2.37 | git-sanitize: add --dry-run and backup before modifying; CRLF detection via git ls-files --eol (no dependency on file) |
+| 1.2.36 | sanitize: add --dry-run, --repo, backup before editing, secrets masked in every output; no unbounded find |
+| 1.2.35 | skill-list: STATE\|ID\|detail output, --json, --lines and --table from a script; stable IDs |
+| 1.2.34 | check: STATE\|ID\|detail output, --json, --table and exit codes from the shared check engine |
+| 1.2.33 | install: add --dry-run, --json and --home; creates folders and the catalog copy through the shared check engine |
+| 1.2.30 | model-route: fix: delegate via Agent tool, not Skill tool |
+| 1.2.29 | skill-list: remove enabled column, use 🟢/🔴 emoji indicators on plugin and skill cells |
+| 1.2.15 | setup: add plugin dep check; skill-list: rename column to ready, check all dep types |
+| 1.2.13 | setup: read dependencies[] instead of requires[] |
+| 1.2.12 | skill-list: fix skill version source to catalog.json |
+| 1.2.11 | skill-list: add dedicated v column for skill version |
+| 1.2.10 | skill-list: add plugin/skill version display, collapse repeated plugin column |
+| 1.2.9 | Add setup skill to verify git and other tool dependencies |
+| 1.2.8 | git-commit: declare git as skill-level requires; skill-list: resolve tools from skill.requires when present |
+| 1.2.7 | skill-list: setup skills always show empty tools column |
+| 1.2.6 | skill-list: add tools column showing external dependency status |
+| 1.2.5 | skill-list: use Markdown table format in output |
+| 1.2.4 | Add skill-list skill |
 | 1.2.32 | `skill-list`: treat install and check as circular skills with an empty ready column |
 | 1.2.31 | Add `check` skill; `install` now creates folders/files and delegates verification to `check` |
 | 1.2.18 | Add `git-sanitize` skill — session-start CRLF hygiene enforcer |
