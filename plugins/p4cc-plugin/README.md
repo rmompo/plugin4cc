@@ -7,14 +7,17 @@ Plugin lifecycle management for the plugin4cc Claude Code marketplace. Tools to 
 | Skill | Invocation | What it does |
 |-------|-----------|--------------|
 | `create` | `/p4cc-plugin:create <name> [skills...]` | Scaffolds a complete new plugin with all required files and registry entries |
-| `update` | `/p4cc-plugin:update <plugin>` | Updates plugin metadata (description, status) and propagates changes to all catalogs and the Claude Code cache |
-| `remove` | `/p4cc-plugin:remove <plugin>` | Removes a plugin and all its files from the repo, every catalog, and the Claude Code cache — requires explicit confirmation |
-| `skill-add` | `/p4cc-plugin:skill-add <plugin> <skill>` | Adds a new skill to an existing plugin, bumps Z versioning, creates the SKILL.md, and syncs the Claude Code cache |
-| `skill-update` | `/p4cc-plugin:skill-update <plugin> <skill>` | Bumps the version of an existing skill, records the changelog entry in catalog.json, and syncs the Claude Code cache |
-| `skill-remove` | `/p4cc-plugin:skill-remove <plugin> <skill>` | Removes a skill from a plugin — deletes SKILL.md and updates catalog.json (Z does not decrease) |
-| `skill-doctor` | `/p4cc-plugin:skill-doctor [plugin] [skill]` | Audits plugin skills for version mismatches, frontmatter issues, allowed-tools gaps, and structural defects — offers to auto-fix eligible findings |
-| `doc-doctor` | `/p4cc-plugin:doc-doctor [plugin]` | Audits documentation completeness and language across specs, plugins/README.md, and README.md — reports findings and offers to auto-generate missing content |
-| `sanitize` | `/p4cc-plugin:sanitize [plugin] [skill]` | Scans plugin and skill files for sensitive information and offers to anonymize it |
+| `update` | `/p4cc-plugin:update <plugin>` | Updates plugin metadata (description, status, version bump) and propagates it to the catalogs; keeps a backup |
+| `remove` | `/p4cc-plugin:remove <plugin> [--soft\|--restore]` | Removes a plugin (backup first, explicit confirmation) or retires it logically without deleting files |
+| `skill-add` | `/p4cc-plugin:skill-add <plugin> <skill>` | Adds a new skill to an existing plugin, bumps Z versioning and creates the SKILL.md |
+| `skill-update` | `/p4cc-plugin:skill-update <plugin> <skill>` | Bumps the version of an existing skill and records the changelog entry in catalog.json |
+| `skill-remove` | `/p4cc-plugin:skill-remove <plugin> <skill> [--soft\|--restore]` | Removes a skill (backup first, explicit confirmation) or retires it logically; Z does not decrease |
+| `skill-doctor` | `/p4cc-plugin:skill-doctor [--plugin P] [--skill S] [--fix auto\|N,M]` | Audits skills (C1–C10). Report-only by default; `--fix` applies the `[auto]` defects after a backup |
+| `doc-doctor` | `/p4cc-plugin:doc-doctor [--plugin P] [--fix auto\|N,M]` | Audits documentation (D1–D9). Report-only by default; `--fix` applies the `[auto]` defects after a backup |
+
+## Common options
+
+Every skill accepts `--dry-run` (writes nothing, prints the exact plan and ends with `RESUMEN|DRY|…`), `--json`, `--repo PATH` (same as `P4CC_REPO`) and `--home DIR`. Output is `STATE|ID|detail` lines plus a `RESUMEN|…` line; exit codes are `0` ok · `1` failures · `2` bad usage · `3` precondition not met. All of it runs through one script, `resources/scripts/p4cc_ops.py`, so it also works from a shell or CI.
 
 ## Installation
 
@@ -26,4 +29,5 @@ claude plugins install p4cc-plugin
 ## Notes
 
 - Encodes the full plugin creation checklist to avoid common mistakes.
-- Automatically updates both registry files (`marketplace.json` and `plugins/README.md`).
+- Works with any marketplace (repo resolved from `--repo`, `P4CC_REPO` or the current git repository) and never writes the Claude Code cache — after pushing, update through `/plugin`.
+- Destructive operations and `--fix` leave a `0600` backup in `<repo>/.p4cc/bak/` first; keep `.p4cc/` out of git.
