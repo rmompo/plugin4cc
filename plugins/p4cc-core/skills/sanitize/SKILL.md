@@ -1,14 +1,27 @@
 ---
 name: sanitize
 description: Scans all files that may contain sensitive information across the repo and offers to anonymize findings. Also invoked explicitly as /p4cc-core:sanitize with optional args.
-version: 29
-argument-hint: "[path]"
+version: 36
+argument-hint: "[path] [--dry-run] [--repo PATH]"
 allowed-tools: [Bash, Read, Edit, AskUserQuestion]
 ---
 
 # Sanitize
 
 Scans **all files that may contain sensitive information** across the repo (documents, configs, scripts, structured data) for PII, credentials, company names, and infrastructure data — and offers to replace findings with safe placeholders, interactively, one at a time.
+
+---
+
+## Options and write safety
+
+| Option | Meaning |
+|--------|---------|
+| `--dry-run` | Runs Steps 1–4 and **writes nothing**: no `Edit`, no backup. It prints the exact plan, one line per replacement — `DRY\|modify\|<file>:<line> (<category>) <masked excerpt> -> <placeholder>` — and ends with `RESUMEN\|DRY\|<n> replacements in <m> files`. It never asks anything. |
+| `--repo PATH` | Repository to scan (same as `P4CC_REPO`; the flag wins). |
+
+**Backup before modifying.** Before the first replacement, copy every file that will be edited to `<REPO_ROOT>/.p4cc/bak/<timestamp>/files/` (directories `0700`, files `0600`) with the helper in Step 5, and tell the user where. Add `.p4cc/` to `.gitignore` or `.git/info/exclude`. Nothing is restored automatically; if something fails, restore with `cp -a "<backup>/files/." "<REPO_ROOT>/"`.
+
+**Secrets are never printed in full — not in the report, not in the plan, not in any output.** For credentials, tokens, keys, passwords, financial data and national IDs show only the category, the line, the first 3 characters followed by `***` and the length (e.g. `sk-***(51)`). Never print the content of `.env` files: report only the number of findings per file.
 
 ---
 
@@ -24,10 +37,15 @@ Scans **all files that may contain sensitive information** across the repo (docu
 
 ## Step 1 — Resolve scope
 
-Locate repo root:
+Locate the repo root **without searching the whole home directory**: `--repo PATH` → `P4CC_REPO` → git root of the current directory → walk up to the nearest `.claude-plugin/marketplace.json`. If none of them resolves, stop with exit code 3 and say so.
+
 ```bash
-find ~ -name "marketplace.json" -path "*plugin4cc*" ! -path "*cache*" ! -path "*marketplaces*" 2>/dev/null | head -1
-# REPO_ROOT = two levels up
+REPO_ROOT="${REPO_ARG:-${P4CC_REPO:-$(git rev-parse --show-toplevel 2>/dev/null)}}"
+if [ -z "$REPO_ROOT" ]; then
+  d="$PWD"; while [ "$d" != "/" ] && [ ! -f "$d/.claude-plugin/marketplace.json" ]; do d=$(dirname "$d"); done
+  [ -f "$d/.claude-plugin/marketplace.json" ] && REPO_ROOT="$d"
+fi
+[ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT" ] || { echo "FAIL|precondition|no repository found (use --repo PATH)"; exit 3; }
 ```
 
 Determine target files based on arguments:
@@ -62,6 +80,8 @@ find "$REPO_ROOT" -type f \
   ! -path "*/node_modules/*" \
   ! -path "*/__pycache__/*" \
   ! -path "*/.venv/*" \
+  ! -path "*/.p4cc/*" \
+  ! -path "*/.claude-session/*" \
   | sort
 ```
 
@@ -118,7 +138,7 @@ Group findings by file and category. For each finding record:
 - File path (relative to repo root)
 - Line number
 - Category
-- Matched text (excerpt, truncated if long)
+- Matched text (excerpt, truncated if long) — **masked for secrets, see "Options and write safety"**
 - Confidence: `high` (auto-flag) or `review` (needs human judgment)
 - Suggested placeholder (see table below)
 
@@ -150,7 +170,8 @@ If **no findings**: report clean and exit.
 If findings exist:
 
 1. Show a summary table: file → N findings per category
-2. Call `AskUserQuestion`:
+2. **With `--dry-run`: print the plan (one `DRY|modify|…` line per replacement, secrets masked) and the closing `RESUMEN|DRY|…` line, then stop — do not ask anything and do not continue to Step 5.**
+3. Otherwise call `AskUserQuestion`:
    - question: `"X sensitive findings detected across Y files. How do you want to proceed?"`
    - header: `"Action"`
    - options:
@@ -161,6 +182,17 @@ If findings exist:
 ---
 
 ## Step 5 — Apply fixes
+
+**First, the backup.** Collect the files that will be edited and copy them once, before the first `Edit`:
+
+```bash
+BAK="$REPO_ROOT/.p4cc/bak/$(date +%Y%m%d-%H%M%S)"
+( umask 077; mkdir -p "$BAK/files"
+  for f in <files to edit, relative to the repo>; do mkdir -p "$BAK/files/$(dirname "$f")"; cp -p "$REPO_ROOT/$f" "$BAK/files/$f"; chmod 600 "$BAK/files/$f"; done )
+echo "OK|backup|$BAK/"
+```
+
+Then apply the replacements:
 
 ### One-by-one mode
 For each finding:
@@ -190,6 +222,8 @@ Findings total:  N  (N high / N review)
 Fixed:           N
 Skipped:         N
 
+Backup:          <REPO_ROOT>/.p4cc/bak/<timestamp>/
+
 Files modified:
   docs/architecture.md
   plugins/<plugin>/skills/<skill>/SKILL.md
@@ -199,6 +233,7 @@ Files modified:
 Next steps:
   1. Review changes with: git diff
   2. git add + commit
-  3. claude plugins update <plugin>  (if skill content changed)
+  3. In Claude Code: /plugin → update the marketplace and the plugin (if skill content changed)
 ═══════════════════════════════════════════════════
+RESUMEN|OK|<n> replacements in <m> files      (RESUMEN|DRY|… with --dry-run)
 ```

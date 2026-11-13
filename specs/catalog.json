@@ -12,10 +12,14 @@
       "description": "Core productivity plugin: behavioral directives (P4CCD), intelligent model routing via subagents, and Conventional Commits enforcement.",
       "category": "productivity",
       "status": "stable",
-      "version": "1.2.35",
+      "version": "1.2.36",
       "spec": "specs/p4cc-core.md",
       "path": "plugins/p4cc-core",
       "changelog": [
+        {
+          "version": "1.2.36",
+          "changes": "sanitize: add --dry-run, --repo, backup before editing, secrets masked in every output; no unbounded find"
+        },
         {
           "version": "1.2.35",
           "changes": "skill-list: STATE|ID|detail output, --json, --lines and --table from a script; stable IDs"
@@ -298,8 +302,12 @@
         },
         {
           "name": "sanitize",
-          "version": 29,
+          "version": 36,
           "changelog": [
+            {
+              "version": 36,
+              "changes": "add --dry-run, --repo, backup before editing, secrets masked in every output; no unbounded find"
+            },
             {
               "version": 29,
               "changes": "Update argument-hint to [path]"
