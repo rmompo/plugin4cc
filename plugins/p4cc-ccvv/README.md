@@ -19,8 +19,8 @@ All data lives in `~/.p4cc/p4cc-ccvv/`:
 
 | Skill | Invocation | What it does |
 |-------|------------|--------------|
-| `install` | `/p4cc-ccvv:install` | Creates `~/.p4cc/p4cc-ccvv/profiles/` and the catalog copy, then runs `check`. |
-| `check` | `/p4cc-ccvv:check` | Read-only check of storage folders, templates/schemas, and pandoc, pdflatex, python3. Reports how to fix anything missing. |
+| `install` | `/p4cc-ccvv:install` | Creates `~/.p4cc/`, `~/.p4cc/p4cc-ccvv/profiles/` and installs the marketplace `catalog.json` copy. Options: `--dry-run`, `--json`, `--home DIR`. |
+| `check` | `/p4cc-ccvv:check` | Read-only check of folders, catalog, tools and shipped files; `STATE\|ID\|detail` lines, `--json`, exit codes. |
 | `profile-gather` | `/p4cc-ccvv:profile-gather` | Extract profile data from a source CV file |
 | `profile-update` | `/p4cc-ccvv:profile-update` | Update an existing profile with new data |
 | `generate` | `/p4cc-ccvv:generate` | Generate an adapted CV draft for a job position |
