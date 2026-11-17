@@ -30,6 +30,10 @@ print(f"{'═'*60}\n")
 
 # ── 1. Leer configuración ─────────────────────────────────────────────────────
 config = _cfg_pre
+# The config template documented in the extract skill has no "metrics" and its "session" has no
+# crawl_*/filter_* keys: make sure both exist, so the final write never raises KeyError.
+config.setdefault("session", {})
+config.setdefault("metrics", {})
 
 topic    = config['filter']['topic']
 keywords = [kw.lower() for kw in config['filter']['keywords']]

@@ -1,6 +1,6 @@
 # Plugin Spec: p4cc-crawler
 
-> **Status:** `beta` | **Version:** `1.0.6`
+> **Status:** `beta` | **Version:** `1.0.7`
 
 ---
 
@@ -76,6 +76,7 @@ Orchestrates the full documentation extraction pipeline in 8 phases: configure (
 
 | Version | Changes |
 |---------|---------|
+| 1.0.7 | `extract`: fix `KeyError: 'metrics'` (and `'session'`) at the end of the SPA and BFS crawl, and in `filter.py` / `download.py` — both keys are initialised when the config is loaded; the documented config template now includes `metrics` |
 | 1.0.6 | check: STATE\|ID\|detail output, --json, --table and exit codes from the shared check engine |
 | 1.0.5 | install: add --dry-run, --json and --home; creates folders and the catalog copy through the shared check engine |
 | 1.0.4 | `check`: raise python3 minimum to >=3.10.0 |

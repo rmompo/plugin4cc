@@ -1353,7 +1353,7 @@
       "description": "Web crawler and documentation extractor: crawls sites (static or SPA/Storybook), filters by topic, downloads attachments, and generates structured Markdown output.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "spec": "specs/p4cc-crawler.md",
       "path": "plugins/p4cc-crawler",
       "scopes": [
@@ -1372,6 +1372,10 @@
         }
       ],
       "changelog": [
+        {
+          "version": "1.0.7",
+          "changes": "extract: fix KeyError 'metrics' (and 'session') in crawl.py, filter.py and download.py: both keys are initialised when the config is loaded; the config template now includes metrics"
+        },
         {
           "version": "1.0.6",
           "changes": "check: STATE|ID|detail output, --json, --table and exit codes from the shared check engine"
@@ -1422,8 +1426,12 @@
         },
         {
           "name": "extract",
-          "version": 2,
+          "version": 7,
           "changelog": [
+            {
+              "version": 7,
+              "changes": "fix KeyError 'metrics' (and 'session') in crawl.py, filter.py and download.py: both keys are initialised when the config is loaded; the config template now includes metrics"
+            },
             {
               "version": 2,
               "changes": "Initial release — full crawl-to-markdown pipeline"

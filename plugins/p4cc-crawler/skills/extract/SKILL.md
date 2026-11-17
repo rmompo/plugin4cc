@@ -1,7 +1,7 @@
 ---
 name: extract
 description: Crawls a website, filters content by topic, downloads pages and attachments, and generates a structured Markdown index. Supports static sites (curl) and SPAs (playwright). Also invoked explicitly as /p4cc-crawler:extract.
-version: 2
+version: 7
 allowed-tools: [Bash, AskUserQuestion]
 ---
 
@@ -58,7 +58,8 @@ Generate `scrapper-config.json` at the output folder (no credentials in file):
   "auth": {"login_required": <true|false>, "login_url": "<url>", "login_type": "<type>"},
   "filter": {"topic": "<topic>", "keywords": ["<kw1>", "<kw2>"]},
   "output": {"folder": "<output_path>", "main_file": "INDEX.md", "mode": "multi"},
-  "session": {"status": "configured", "crawl": null, "filter": null, "generate": null}
+  "session": {"status": "configured", "crawl": null, "filter": null, "generate": null},
+  "metrics": {}
 }
 ```
 
