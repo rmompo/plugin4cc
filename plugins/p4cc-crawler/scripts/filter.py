@@ -31,9 +31,11 @@ print(f"{'═'*60}\n")
 # ── 1. Leer configuración ─────────────────────────────────────────────────────
 config = _cfg_pre
 # The config template documented in the extract skill has no "metrics" and its "session" has no
-# crawl_*/filter_* keys: make sure both exist, so the final write never raises KeyError.
-config.setdefault("session", {})
-config.setdefault("metrics", {})
+# crawl_*/filter_* keys. Make sure both are dicts (absent, null or malformed values are replaced),
+# so the final write never raises KeyError/TypeError.
+for _key in ("session", "metrics"):
+    if not isinstance(config.get(_key), dict):
+        config[_key] = {}
 
 topic    = config['filter']['topic']
 keywords = [kw.lower() for kw in config['filter']['keywords']]

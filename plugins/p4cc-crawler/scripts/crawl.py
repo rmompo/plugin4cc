@@ -25,9 +25,11 @@ CONFIG_PATH = sys.argv[1] if len(sys.argv) > 1 else "generated/scrapp/mova3/data
 with open(CONFIG_PATH) as f:
     config = json.load(f)
 # The config template documented in the extract skill has no "metrics" and its "session" has no
-# crawl_*/filter_* keys: make sure both exist, so the final write never raises KeyError.
-config.setdefault("session", {})
-config.setdefault("metrics", {})
+# crawl_*/filter_* keys. Make sure both are dicts (absent, null or malformed values are replaced),
+# so the final write never raises KeyError/TypeError.
+for _key in ("session", "metrics"):
+    if not isinstance(config.get(_key), dict):
+        config[_key] = {}
 
 _data_dir          = config["output"]["folder"] + "/data"
 COOKIES_PATH       = f"{_data_dir}/scrapper-cookies.txt"

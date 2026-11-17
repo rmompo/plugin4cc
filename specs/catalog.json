@@ -1353,7 +1353,7 @@
       "description": "Web crawler and documentation extractor: crawls sites (static or SPA/Storybook), filters by topic, downloads attachments, and generates structured Markdown output.",
       "category": "productivity",
       "status": "beta",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "spec": "specs/p4cc-crawler.md",
       "path": "plugins/p4cc-crawler",
       "scopes": [
@@ -1372,6 +1372,10 @@
         }
       ],
       "changelog": [
+        {
+          "version": "1.0.8",
+          "changes": "extract: harden the metrics/session initialisation: null or malformed values are replaced by an empty dict (not only absent keys)"
+        },
         {
           "version": "1.0.7",
           "changes": "extract: fix KeyError 'metrics' (and 'session') in crawl.py, filter.py and download.py: both keys are initialised when the config is loaded; the config template now includes metrics"
@@ -1426,8 +1430,12 @@
         },
         {
           "name": "extract",
-          "version": 7,
+          "version": 8,
           "changelog": [
+            {
+              "version": 8,
+              "changes": "harden the metrics/session initialisation: null or malformed values are replaced by an empty dict (not only absent keys)"
+            },
             {
               "version": 7,
               "changes": "fix KeyError 'metrics' (and 'session') in crawl.py, filter.py and download.py: both keys are initialised when the config is loaded; the config template now includes metrics"

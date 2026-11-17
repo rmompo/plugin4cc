@@ -1,7 +1,7 @@
 ---
 name: extract
 description: Crawls a website, filters content by topic, downloads pages and attachments, and generates a structured Markdown index. Supports static sites (curl) and SPAs (playwright). Also invoked explicitly as /p4cc-crawler:extract.
-version: 7
+version: 8
 allowed-tools: [Bash, AskUserQuestion]
 ---
 
